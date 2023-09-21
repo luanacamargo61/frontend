@@ -1,0 +1,42 @@
+@media (min-width: 576px){
+    .principal{ 
+        background-color: rgb(122, 0, 0);
+  }
+}
+@media (min-width: 768px){
+    .principal{ 
+        background-color: rgb(0, 4, 128);
+  }
+}
+@media (min-width: 992px){
+    .principal{ 
+        background-color: rgb(26, 152, 23);
+  }
+}
+@media (min-width: 1400px){
+    .principal{ 
+        background-color: rgb(93, 7, 112);
+  }
+}
+
+
+@media (min-width: 576px){
+    .principalimg{ 
+        background-color: rgb(122, 0, 0);
+  }
+}
+@media (min-width: 768px){
+    .principalimg{ 
+        background-color: rgb(0, 4, 128);
+  }
+}
+@media (min-width: 992px){
+    .principalimg{ 
+        background-color: rgb(26, 152, 23);
+  }
+}
+@media (min-width: 1400px){
+    .principalimg{ 
+        background-color: rgb(93, 7, 112);
+  }
+}

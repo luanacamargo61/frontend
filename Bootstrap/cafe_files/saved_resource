@@ -1,0 +1,1788 @@
+/**
+ * NamespaceWidget
+ * Alterar NamespaceWidget
+ **/
+
+function onMessageReceived(e) {
+  NamespaceWidget.actions(e.data.cmd, e.data.value);
+}
+
+if (window.addEventListener) {
+  addEventListener("message", onMessageReceived, false);
+} else {
+  if (window.attachEvent) {
+    attachEvent("onmessage", onMessageReceived);
+  } else {
+    window.onmessage = onMessageReceived;
+  }
+}
+
+var _etag_manager = _etag_manager || {};
+var _dataCapture = _dataCapture || {};
+var _etag_itens = _etag_itens || [];
+var _div_container = _div_container || "";
+var _div_container_call = _div_container_call || "";
+var _div_container_promo = _div_container_promo || "";
+var _div_overlay = _div_overlay || "";
+var _iframe = _iframe || "";
+var _configs = _configs || null;
+var _ve_banner = _ve_banner || {};
+var _reRenderElements = _reRenderElements || [];
+var _ve_session = _ve_session || null;
+var _permit_save = _permit_save || true;
+var _session_converted = _session_converted || false;
+var etagUTMs = new RegExp("EtagPanel|EtagWid|EtagMail|etagpanel|etagmail|utm_source=etag");
+var isEtagOnUTM = !!etagUTMs.exec(window.location.href);
+var closeOnOutClick = 0;
+
+var NamespaceWidget = {
+  init: function () {
+    if (this.getJQuery()) {
+      if (typeof jQuery === "undefined") {
+        var script = document.createElement("script");
+        script.src =
+          location.protocol != "https:"
+            ? "http://code.jquery.com/jquery-1.11.0.min.js"
+            : "https://code.jquery.com/jquery-1.11.0.min.js";
+        script.type = "text/javascript";
+        document.getElementsByTagName("head")[0].appendChild(script);
+
+        setTimeout(function () {
+          NamespaceWidget.init();
+        }, 300);
+        return;
+      }
+    }
+
+    var _ve_session = this.getSession();
+    _ve_session = _ve_session || {
+      sessionId: this.uuidv4(),
+      funnel: "visit",
+      total: 0,
+    };
+    
+    //GET URL
+    var _URL = window.location.href;
+
+    if (_URL && (_URL.indexOf("utm_source") > -1 || _URL.indexOf("utm_etag") > -1)) {
+      //localStorage.setItem("_etag_conversions", _URL);
+      NamespaceWidget.setCookie("_etag_conversions",
+        _URL,
+        //btoa(_URL),
+        0
+      );
+    }
+
+    if (this.getBanner.last_tab == true || this.getBanner.last_tab == "true") {
+      if (
+        !this.getCookie("bossa_tabIndex") ||
+        this.getCookie("bossa_tabIndex") == null
+      ) {
+        this.setCookie("bossa_tabIndex", 1, 0);
+        this.setSession(_ve_session, "tabIndex", 1);
+      } else if (
+        Number.parseInt(this.getCookie("bossa_tabIndex")) >= 1 &&
+        (!_ve_session.tabIndex || typeof _ve_session.tabIndex == "undefined")
+      ) {
+        //INCREMENTA O INDICE
+        this.setCookie(
+          "bossa_tabIndex",
+          Number.parseInt(this.getCookie("bossa_tabIndex")) + 1,
+          0
+        );
+        this.setSession(
+          _ve_session,
+          "tabIndex",
+          Number.parseInt(this.getCookie("bossa_tabIndex"))
+        );
+      }
+
+      if (
+        Number.parseInt(_ve_session.tabIndex) >=
+        Number.parseInt(this.getCookie("bossa_tabIndex"))
+      ) {
+        this.setCookie("bossa_sessionId", _ve_session.sessionId, 0);
+      }
+    }
+
+    var _produtos = {};
+    var _checkout = {};
+    var _cart = {};
+    var _confirmation = {};
+
+    scheme = this.scheme();
+    schemeProdutos = this.scheme("produtos");
+    schemeCheckout = this.scheme("checkout");
+    schemeCart = this.scheme("carrinho");
+    schemeConfirmation = this.scheme("confirmacao");
+
+    /*
+     *	CARRINHO CAPTURE
+     */
+    var item = {};
+    var itens = [];
+
+    for (key in schemeCart["setup"]) {
+      if (schemeCart["setup"][key].fieldType == "rawseries") {
+        values = NamespaceWidget.getSelectorAllCarrinho(
+          schemeCart["setup"][key].classe
+        );
+        if (!values || values == null) continue;
+
+        if (values.length <= 0) continue;
+
+        var item = [];
+        for (var i = 0; i < values.length; i++) {
+          if (schemeCart["setup"][key].htmlAttribute == "innerHTML") {
+            val = this.clean(values[i].innerHTML);
+            item[i] = val;
+          } else if (schemeCart["setup"][key].htmlAttribute == "richtext") {
+            val = NamespaceWidget.cleanRickText(values[i].innerHTML);
+            item[i] = typeof val == "undefined" ? "" : val;
+          } else if (
+            schemeCart["setup"][key].htmlAttribute == "background-image"
+          ) {
+            var style =
+              values[i].currentStyle ||
+              window.getComputedStyle(values[i], false);
+            val = style.backgroundImage.slice(4, -1).replace(/"/g, "");
+            item[i] = val;
+          } else if (schemeCart["setup"][key].htmlAttribute == "src") {
+            val = this.clean(values[i].src);
+            item[i] = val;
+          } else if (schemeCart["setup"][key].htmlAttribute == "metaContent") {
+            item[i] = NamespaceWidget.clean(values[i].getAttribute(schemeCart["setup"][key].htmlAttribute));
+          } else if (schemeCart["setup"][key].htmlAttribute == "value") {
+            item[i] = NamespaceWidget.clean(values[i].getAttribute(schemeCart["setup"][key].htmlAttribute) || values[i].value);
+          } else if (schemeCart["setup"][key].htmlAttribute == "href") {
+            item[i] = values[i].href;
+          }
+        }
+        itens[key] = item;
+      }
+    }
+
+    //CONCILIA CAPTURA RAWSERIES
+    var delimiter = itens["pName_b"] ? itens["pName_b"].length : 0;
+
+    var tmp = [];
+
+    var capture = NamespaceWidget.getSession().formCapture;
+    for (var i = 0; i < delimiter; i++) {
+      var item = {};
+      for (var key in itens) {
+        val =
+          itens[key][i] && itens[key][i] !== null ? itens[key][i] : itens[key];
+        if (val != "" && (typeof val === "string" || val instanceof String)) {
+          item[key] = val;
+        }
+      }
+      tmp.push(item);
+    }
+    itens = tmp;
+
+    //CAPTURA ITENS RAW CARRINHO
+    for (key in schemeCart["setup"]) {
+      if (schemeCart["setup"][key].fieldType == "raw") {
+        value = this.capture(
+          schemeCart["setup"][key].classe,
+          schemeCart["setup"][key].domevent,
+          schemeCart["setup"][key].htmlAttribute
+        );
+        _cart = this.set(_cart, key, value);
+      }
+    }
+
+    _cart = this.set(_cart, "produtos", itens);
+
+    //FAZ CAPTURA DE OUTRAS PAGINAS
+    for (var x in scheme) {
+      for (key in scheme[x].setup) {
+        if (scheme[x].setup) {
+          value = this.capture(
+            scheme[x].setup[key].classe,
+            scheme[x].setup[key].domevent,
+            scheme[x].setup[key].htmlAttribute
+          );
+          if (x == "produtos") {
+            value =
+              key == "pURL_pp" && (value == null || value == "")
+                ? window.location.href
+                : value;
+            _produtos = this.set(_produtos, key, value);
+          } else if (x == "checkout")
+            _checkout = this.set(_checkout, key, value);
+          else if (x == "confirmacao")
+            _confirmation = this.set(_confirmation, key, value);
+        }
+      }
+    }
+
+    var data = {
+      url: window.location.href,
+      sessionid: this.getSession().sessionId,
+      produtos: _produtos,
+      checkout: _checkout,
+      carrinho: _cart,
+      confirmacao: _confirmation,
+    };
+
+    //salva dados dos produtos no endpoint
+    this.save(data);
+    NamespaceWidget.setSession(_ve_session, "formCapture", data);
+
+    var send_server = false;
+    var _last_data = {};
+    var _is_render = false;
+    var _interval_rerender = setInterval(function () {
+      if (_is_render) return;
+      _is_render = true;
+
+      scheme = NamespaceWidget.scheme();
+      var selector = "";
+      var email = null;
+      var origem_email = null;
+
+      /*
+       *	CARRINHO CAPTURE
+       */
+      var item = {};
+      var itens = [];
+
+      for (key in schemeCart["setup"]) {
+        if (schemeCart["setup"][key].fieldType == "rawseries") {
+          values = NamespaceWidget.getSelectorAllCarrinho(
+            schemeCart["setup"][key].classe
+          );
+
+          if (!values || values == null) continue;
+
+          if (values.length <= 0) continue;
+
+          var item = [];
+          for (var i = 0; i < values.length; i++) {
+            if (schemeCart["setup"][key].htmlAttribute == "innerHTML") {
+              val = NamespaceWidget.clean(values[i].innerHTML);
+              item[i] = val;
+            } else if (
+              schemeCart["setup"][key].htmlAttribute == "background-image"
+            ) {
+              var style =
+                values[i].currentStyle ||
+                window.getComputedStyle(values[i], false);
+              val = style.backgroundImage.slice(4, -1).replace(/"/g, "");
+              item[i] = val;
+            } else if (schemeCart["setup"][key].htmlAttribute == "richtext") {
+              val = NamespaceWidget.cleanRickText(values[i].innerHTML);
+              item[i] = typeof val == "undefined" ? "" : val;
+            } else if (schemeCart["setup"][key].htmlAttribute == "src") {
+              val = NamespaceWidget.clean(values[i].src);
+              item[i] = val;
+            } else if (schemeCart["setup"][key].htmlAttribute == "metaContent") {
+              item[i] = NamespaceWidget.clean(values[i].getAttribute(schemeCart["setup"][key].htmlAttribute));
+            } else if (schemeCart["setup"][key].htmlAttribute == "value") {
+              item[i] = NamespaceWidget.clean(values[i].getAttribute(schemeCart["setup"][key].htmlAttribute) || values[i].value);
+            } else if (schemeCart["setup"][key].htmlAttribute == "href") {
+              item[i] = values[i].href;
+            }
+          }
+          itens[key] = item;
+        }
+      }
+
+      //CONCILIA CAPTURA RAWSERIES
+      var delimiter = itens["pName_b"] ? itens["pName_b"].length : 0;
+
+      var tmp = [];
+
+      for (var i = 0; i < delimiter; i++) {
+        var item = {};
+        for (var key in itens) {
+          val =
+            itens[key][i] && itens[key][i] !== null
+              ? itens[key][i]
+              : itens[key];
+          if (val != "" && (typeof val === "string" || val instanceof String)) {
+            item[key] = val;
+          }
+        }
+        tmp.push(item);
+      }
+      itens = tmp;
+
+      //CAPTURA ITENS RAW CARRINHO
+      for (key in schemeCart["setup"]) {
+        if (schemeCart["setup"][key].fieldType == "raw") {
+          value = NamespaceWidget.capture(
+            schemeCart["setup"][key].classe,
+            schemeCart["setup"][key].domevent,
+            schemeCart["setup"][key].htmlAttribute
+          );
+          //itens[key] = value;
+          _cart = NamespaceWidget.set(_cart, key, value);
+        }
+      }
+
+      _cart = NamespaceWidget.set(_cart, "produtos", itens);
+      //FIM CARRINHO
+
+      for (var x in scheme) {
+        for (key in scheme[x].setup) {
+          if (
+            scheme[x].setup[key].domevent == "rerender" &&
+            (scheme[x].setup[key].htmlAttribute == "innerHTML" ||
+              scheme[x].setup[key].htmlAttribute == "value")
+          ) {
+            value = NamespaceWidget.capture(
+              scheme[x].setup[key].classe,
+              scheme[x].setup[key].domevent,
+              scheme[x].setup[key].htmlAttribute
+            );
+
+            if (x == "checkout")
+              _checkout = NamespaceWidget.set(_checkout, key, value);
+            else if (x == "confirmacao")
+              _confirmation = NamespaceWidget.set(_confirmation, key, value);
+
+            if (
+              (key == "Email" && value != null) ||
+              (key == "Register_Email" && value != null) ||
+              (key == "Login_Email" && value != null) ||
+              (key.toLowerCase().indexOf("email") > -1 &&
+                value != null &&
+                email != "")
+            ) {
+              email = value != null ? value : email;
+              origem_email = email != null && email != "" ? key : null;
+            }
+
+            send_server = value != "" || value != null ? true : false;
+          }
+        }
+      }
+
+      if (send_server) {
+        var data = {
+          url: window.location.href,
+          origem_email: origem_email,
+          email: email,
+          utm: NamespaceWidget.getCookie("_etag_conversions"), // localStorage.getItem("_etag_conversions"),
+          sessionid: NamespaceWidget.getSession().sessionId,
+          produtos: _produtos,
+          checkout: _checkout,
+          carrinho: _cart,
+          confirmacao: _confirmation,
+        };
+
+        NamespaceWidget.setSession(_ve_session, "formCapture", data);
+        if (JSON.stringify(data) != JSON.stringify(_last_data)) {
+          NamespaceWidget.save(data);
+        }
+        _last_data = JSON.parse(JSON.stringify(data));
+        send_server = false;
+      }
+      _is_render = false;
+    }, 2000);
+
+    function matchUrlCapture(pages_on_fire) {
+      if (pages_on_fire.length > 0) {
+        for (var x = 0; x < pages_on_fire.length; x++) {
+          if (pages_on_fire[x] == null) continue;
+
+          if (window.location.href == pages_on_fire[x]) {
+            return true;
+          } else {
+            var url_test = window.location.href;
+            var urlEntrada = pages_on_fire[x];
+            urlEntrada = urlEntrada.replace(/\//g, "\\/");
+            urlEntrada = urlEntrada.replace(/\./g, "\\.");
+            urlEntrada = urlEntrada.replace(/\?/g, "\\?");
+            urlEntrada = urlEntrada.replace(/\*/g, "((?!\\/).)*");
+            urlEntrada = "^" + urlEntrada + "$";
+
+            var _regText = new RegExp(urlEntrada).test(url_test);
+            if (_regText) {
+              return true;
+            }
+          }
+        }
+      } else {
+        return true;
+      }
+    }
+  },
+  getClass: function (class_name) {
+    var _class = class_name.split(" ");
+    var classes = "";
+
+    for (var i in _class.length) {
+      classes += _class + " ";
+    }
+
+    return classes;
+  },
+  getSelectorAllCarrinho: function (classes) {
+    if (classes.trim() == "") return null;
+    return NamespaceWidget.getJQuery()
+      ? $(classes)
+      : document.querySelectorAll(classes);
+  },
+  getSelectorAll: function (classes, index) {
+    if (classes.trim() == "") return null;
+    return NamespaceWidget.getJQuery()
+      ? $(classes).eq(index)
+      : document.querySelectorAll(classes)[index];
+  },
+  getSelectorAllInnerHtml: function (classes, index) {
+    if (classes.trim() == "") return null;
+    return NamespaceWidget.getJQuery()
+      ? $(classes).eq(index).text()
+      : document.querySelectorAll(classes)[index].innerHTML;
+  },
+  getSelectorAllBackgroundImage: function (classes, index) {
+    if (classes.trim() == "") return null;
+
+    var el = document.querySelectorAll(classes)[index],
+      style = el.currentStyle || window.getComputedStyle(el, false);
+    return style.backgroundImage.slice(4, -1).replace(/"/g, "");
+  },
+  getSelectorAllAttribute: function (classes, index, html_attribute) {
+    if (classes.trim() == "") return null;
+    //AJUSTE PARA RESOLVER CAPTURA NO CAMPO DE QTD
+    if (html_attribute == "value") {
+      if (NamespaceWidget.getJQuery()) return $(classes).eq(index).val();
+
+      return document.querySelectorAll(classes)[index]
+        ? document.querySelectorAll(classes)[index].value
+        : "";
+    } else if (html_attribute == "src") {
+      return NamespaceWidget.getJQuery()
+        ? $(classes).eq(index).prop(html_attribute)
+        : document.querySelectorAll(classes)[index].src;
+    } else if (html_attribute == "metaContent") {
+      return document.querySelectorAll(classes)[index].content;
+    }
+
+    return NamespaceWidget.getJQuery()
+      ? $(classes).eq(index).attr(html_attribute)
+      : document.querySelectorAll(classes)[index].getAttribute(html_attribute);
+  },
+  getSelector: function (classes) {
+    if (classes.trim() == "") return null;
+    return NamespaceWidget.getJQuery()
+      ? $(classes)
+      : document.querySelector(classes);
+  },
+  getSelectorInnerHtml: function (classes) {
+    if (classes.trim() == "") return null;
+    return NamespaceWidget.getJQuery()
+      ? $(classes).text()
+      : document.querySelector(classes).innerHTML;
+  },
+  getSelectorBackgroundImage: function (classes) {
+    if (classes.trim() == "") return null;
+    var el = document.querySelector(classes),
+      style = el.currentStyle || window.getComputedStyle(el, false);
+    return style.backgroundImage.slice(4, -1).replace(/"/g, "");
+  },
+  getSelectorAttribute: function (classes, html_attribute) {
+    if (classes.trim() == "") return null;
+    //AJUSTE PARA RESOLVER CAPTURA NO CAMPO DE QTD
+    if (html_attribute == "value") {
+      if (NamespaceWidget.getJQuery()) return $(classes).val();
+
+      return document.querySelector(classes)
+        ? document.querySelector(classes).value
+        : "";
+    } else if (html_attribute == "src") {
+      return NamespaceWidget.getJQuery()
+        ? $(classes).prop(html_attribute)
+        : document.querySelector(classes).src;
+    } else if (html_attribute == "metaContent") {
+      return document.querySelector(classes).content;
+    }
+
+    return NamespaceWidget.getJQuery()
+      ? $(classes).attr(html_attribute)
+      : document.querySelector(classes).getAttribute(html_attribute);
+  },
+  getParamFromURL: function (classes) {
+    if (classes.trim() == "") return null;
+    return NamespaceWidget.getURLParameter(classes);
+  },
+  capture: function (
+    class_name,
+    event,
+    html_attribute,
+    field_type,
+    index = -1
+  ) {
+    var data = null;
+    if (!NamespaceWidget.getJQuery()) {
+      var _class = class_name.split(" ");
+      var classes = "";
+      for (var x = 0; x < _class.length; x++) {
+        classes += _class[x] + " ";
+      }
+    } else {
+      classes = class_name;
+    }
+
+    if (event == "onload") {
+      if (index >= 0) {
+        if (
+          html_attribute == "innerHTML" &&
+          NamespaceWidget.getSelectorAll(classes, index)
+        ) {
+          data = this.clean(
+            NamespaceWidget.getSelectorAllInnerHtml(classes, index)
+          );
+        } else if (
+          html_attribute == "background-image" &&
+          NamespaceWidget.getSelector(classes, index)
+        ) {
+          data = NamespaceWidget.getSelectorAllBackgroundImage(classes, index);
+        } else if (
+          html_attribute == "richtext" &&
+          NamespaceWidget.getSelector(classes, index)
+        ) {
+          data = NamespaceWidget.getSelectorAllInnerHtml(classes, index);
+        } else if (NamespaceWidget.getSelectorAll(classes, index)) {
+          data = this.clean(
+            NamespaceWidget.getSelectorAllAttribute(
+              classes,
+              index,
+              html_attribute
+            )
+          );
+        }
+      } else {
+        if (
+          html_attribute == "innerHTML" &&
+          NamespaceWidget.getSelector(classes)
+        ) {
+          data = this.clean(NamespaceWidget.getSelectorInnerHtml(classes));
+        } else if (html_attribute == "url") {
+          data = this.clean(NamespaceWidget.getParamFromURL(classes));
+        } else if (
+          html_attribute == "background-image" &&
+          NamespaceWidget.getSelector(classes)
+        ) {
+          data = NamespaceWidget.getSelectorBackgroundImage(classes);
+        } else if (
+          html_attribute == "richtext" &&
+          NamespaceWidget.getSelector(classes)
+        ) {
+          data = NamespaceWidget.getSelectorInnerHtml(classes);
+        } else if (NamespaceWidget.getSelector(classes)) {
+          data = this.clean(
+            NamespaceWidget.getSelectorAttribute(classes, html_attribute)
+          );
+        }
+      }
+    } else {
+      var element = NamespaceWidget.getSelector(classes);
+
+      //TAGs que alteram o valor dinamicamente
+      if (element && html_attribute == "innerHTML") {
+        //seta Rerender Element
+        this.setRerender(element);
+        data = this.clean(NamespaceWidget.getSelectorInnerHtml(classes));
+      } else if (element && html_attribute == "richtext") {
+        this.setRerender(element);
+        data = NamespaceWidget.getSelectorInnerHtml(classes);
+      } else if (html_attribute == "url") {
+        data = this.clean(NamespaceWidget.getParamFromURL(classes));
+      } else if (
+        html_attribute == "background-image" &&
+        NamespaceWidget.getSelector(classes)
+      ) {
+        data = NamespaceWidget.getSelectorBackgroundImage(classes);
+      } else if (NamespaceWidget.getSelector(classes) && html_attribute) {
+        data = this.clean(
+          NamespaceWidget.getSelectorAttribute(classes, html_attribute)
+        );
+      }
+    }
+
+    return data;
+  },
+  save: function (data) {
+    if (_permit_save) {
+      this.setCapture(data);
+    }
+  },
+
+  setCapture: function (data) {
+    var _etag = NamespaceWidget.getConversion() || {};
+    _etag.uuid = this.getUUID();
+    _etag.sessionid = NamespaceWidget.getSession().sessionId;
+    var http = new XMLHttpRequest();
+    var params = JSON.stringify(data);
+    var UUID = this.getUUID();
+
+    var produtos = this.schemeCaptured("produtos", data);
+    var carrinho = this.schemeCaptured("carrinho", data);
+    var confirmacao = this.schemeCaptured("confirmacao", data);
+    var checkout = this.schemeCaptured("checkout", data);
+
+    var tipo =
+      carrinho && carrinho.produtos && carrinho.produtos.length > 0
+        ? "carrinho"
+        : "produtos";
+    var total =
+      carrinho.TotalBasket_b !== null &&
+      carrinho.TotalBasket_b &&
+      carrinho.TotalBasket_b != ""
+        ? this.cleanNumbers(carrinho.TotalBasket_b)
+        : 0;
+    var serviceValue = NamespaceWidget.getConversion() ? NamespaceWidget.getConversion().service : null;
+    var service = ["tagemail", "tagassist", "tagwid"].includes(serviceValue)
+      ? serviceValue
+      : "default";
+
+    var _utm_etag = NamespaceWidget.getCookie("_etag_conversions"); // localStorage.getItem("_etag_conversions") ? localStorage.getItem("_etag_conversions") : null;
+
+    var obj = {};
+    obj.sessionid = data.sessionid;
+    obj.uuid = NamespaceWidget.getUUID();
+    obj.ip = null;
+    obj.ordernumber =
+      confirmacao.OrderNumber !== null &&
+      confirmacao.OrderNumber &&
+      confirmacao.OrderNumber != ""
+        ? confirmacao.OrderNumber
+        : null;
+    obj.convertido =
+      confirmacao.OrderNumber !== null &&
+      confirmacao.OrderNumber &&
+      confirmacao.OrderNumber != ""
+        ? true
+        : false;
+    obj.cliente = checkout.Name;
+    obj.total =
+      NamespaceWidget.getConversion() !== null &&
+      parseFloat(NamespaceWidget.getConversion().total) > 0
+        ? NamespaceWidget.getConversion().total
+        : total;
+    obj.phone = null;
+    obj.email =
+      NamespaceWidget.getSession() !== null &&
+      NamespaceWidget.getSession().hasOwnProperty("formCapture") !== false &&
+      NamespaceWidget.getSession().formCapture.hasOwnProperty("email") !== false
+        ? NamespaceWidget.getSession().formCapture.email
+        : null;
+    obj.email_source =
+      NamespaceWidget.getSession() !== null &&
+      NamespaceWidget.getSession().hasOwnProperty("formCapture") &&
+      NamespaceWidget.getSession().formCapture.hasOwnProperty(
+        "origem_email"
+      ) !== false
+        ? NamespaceWidget.getSession().formCapture.origem_email
+        : null;
+    obj.utm = _utm_etag;
+    obj.url = data.url;
+    obj.tipo = tipo;
+
+    obj.source = null;
+    obj.idbanner = null;
+    obj.idemail = null;
+
+    obj.produto = produtos;
+    obj.carrinho = carrinho;
+    obj.confirmacao = confirmacao;
+    obj.checkout = checkout;
+
+    //armazena o servico de recomendacao ETAG
+    if (_utm_etag != null && (service == "default" || isEtagOnUTM)) {
+      if (NamespaceWidget.checkUtm(_utm_etag, "EtagEmail") || NamespaceWidget.checkUtm(_utm_etag, "utm_medium=email"))
+        service = "tagemail";
+      else if (NamespaceWidget.checkUtm(_utm_etag, "EtagWid"))
+        service = "tagwid";
+      else if (NamespaceWidget.checkUtm(_utm_etag, "EtagPanel") || NamespaceWidget.checkUtm(_utm_etag, "partner"))
+        service = "tagassist";
+    }
+
+    /***** EXTRAI CAPTURA DE EMAIL *****/
+    if (obj.email === null || obj.email_source === null) {
+      for (key in checkout) {
+        var patt = /mail/i;
+        var _regText = new RegExp(patt).test(key);
+        if (_regText) {
+          email = this.schemeCaptured(key, checkout);
+
+          if (email !== null && email != "") {
+            obj.email = email;
+            obj.email_source = key;
+            break;
+          }
+        }
+      }
+    }
+
+    _etag.email = obj.email && obj.email != "" ? obj.email : _etag.email;
+    _etag.email_source =
+      obj.email_source && obj.email_source != ""
+        ? obj.email_source
+        : _etag.email_source;
+    _etag.total =
+      obj.total > 0 ? obj.total : NamespaceWidget.getSession().total;
+    _etag.carrinho =
+      obj.carrinho.produtos && obj.carrinho.produtos.length > 0
+        ? obj.carrinho.produtos
+        : _etag.carrinho;
+    _etag.qtd =
+      obj.carrinho.produtos && obj.carrinho.produtos.length > 0
+        ? obj.carrinho.produtos.length
+        : _etag.qtd;
+    _etag.ordernumber =
+      obj.ordernumber != null && obj.ordernumber != ""
+        ? obj.ordernumber
+        : _etag.ordernumber;
+    _etag.service = service;
+    //atualiza captura
+    NamespaceWidget.setConversion(_etag);
+
+    var url = BASE_API_MONGO + "/capture";
+
+    http.open("POST", url, true);
+
+    http.setRequestHeader("Access-Control-Allow-Origin", "*");
+    http.setRequestHeader(
+      "Access-Control-Allow-Methods",
+      "POST, PUT, GET",
+      "OPTIONS"
+    );
+    http.setRequestHeader(
+      "Access-Control-Allow-Headers",
+      "accept, content-type"
+    );
+    http.setRequestHeader("Content-type", "application/json");
+
+    http.onreadystatechange = function () {
+      //Call a function when the state changes.
+      if (http.readyState == 4 && http.status == 201) {
+        //success
+      }
+    };
+    http.send(JSON.stringify(obj));
+
+    //VALIDA EMAIL ANTES DE ENVIAR AO MONGO
+    var validEmail = NamespaceWidget.validateEmail(obj.email);
+
+    //ENVIA EMAILS PARA CONCILIACAO
+    if (obj.email !== null && validEmail) {
+      var objEmail = {};
+      objEmail.email = obj.email;
+      objEmail.source = obj.email_source;
+      objEmail.name = obj.cliente;
+      objEmail.convertido = obj.convertido;
+      objEmail.sessionid = obj.sessionid;
+      objEmail.uuid = obj.uuid;
+      objEmail.carrinho =
+        NamespaceWidget.getConversion().carrinho != null
+          ? NamespaceWidget.getConversion().carrinho
+          : null;
+
+      var httpRequest = new XMLHttpRequest();
+      var url = BASE_API_MONGO + "/emails";
+
+      httpRequest.open("POST", url, true);
+      httpRequest.setRequestHeader("Access-Control-Allow-Origin", "*");
+      httpRequest.setRequestHeader(
+        "Access-Control-Allow-Methods",
+        "POST, PUT, GET",
+        "OPTIONS"
+      );
+      httpRequest.setRequestHeader(
+        "Access-Control-Allow-Headers",
+        "accept, content-type"
+      );
+      httpRequest.setRequestHeader("Content-type", "application/json");
+
+      httpRequest.onreadystatechange = function () {
+        //Call a function when the state changes.
+        if (httpRequest.readyState == 4 && httpRequest.status == 201) {
+          //success
+        }
+      };
+      httpRequest.send(JSON.stringify(objEmail));
+    }
+
+    if (obj.convertido) {
+      var url = BASE_API_MONGO + "/conversions";
+      var httpConvert = new XMLHttpRequest();
+
+      httpConvert.open("POST", url, true);
+
+      httpConvert.setRequestHeader("Access-Control-Allow-Origin", "*");
+      httpConvert.setRequestHeader(
+        "Access-Control-Allow-Methods",
+        "POST, PUT, GET",
+        "OPTIONS"
+      );
+      httpConvert.setRequestHeader(
+        "Access-Control-Allow-Headers",
+        "accept, content-type"
+      );
+      httpConvert.setRequestHeader("Content-type", "application/json");
+
+      httpConvert.onreadystatechange = function () {
+        //Call a function when the state changes.
+        if (httpConvert.readyState == 4 && httpConvert.status == 201) {
+          console.log("limpa cookies");
+          //localStorage.setItem("_etag_conversions", null);
+          NamespaceWidget.eraseCookie("_etag_conversions");
+          //localStorage.setItem("etagConversion", null);
+          NamespaceWidget.eraseCookie("etagConversion");
+        }
+      };
+      httpConvert.send(JSON.stringify(_etag));
+    }
+  },
+  checkUtm: function (_utm_etag, label) {
+    const checkStr = (el) => {
+      return el && el.toString().toLowerCase().includes(label.toLowerCase());
+    }
+
+    return checkStr(_utm_etag.utm_source) || checkStr(this.getCookie("_etag_conversions") /*localStorage.getItem("_etag_conversions")*/) || checkStr(window.location.search);
+  },
+  showCapture: function () {
+    //console.log('**************************');
+    //console.log(_dataCapture);
+    //console.log('**************************');
+  },
+  str_encode: function (str) {
+    var Base64 = {
+      encode: function (str) {
+        return window.btoa(unescape(encodeURIComponent(str)));
+      },
+    };
+    // Encode the String
+    var encodedString = Base64.encode(str);
+    return encodedString;
+  },
+  set: function (item, key, value) {
+    item[key] = value;
+
+    return item;
+  },
+  get: function () {
+    return _etag_manager;
+  },
+  getUUID: function () {
+    return "FC9B5739-4FB0-4DD5-8157-084BFEA10C20";
+  },
+  getJQuery: function () {
+    return ;
+  },
+  setContainer: function (id, type = "default") {
+    if (type == "call") _div_container_call = id;
+    else if (type == "promo") _div_container_promo = id;
+    else {
+      _div_container = id;
+      _etag_manager.container_id = id;
+    }
+  },
+  getContainer: function (type = "default") {
+    if (type == "call") return document.getElementById(_div_container_call);
+    else if (type == "promo")
+      return document.getElementById(_div_container_promo);
+    else return document.getElementById(_div_container);
+  },
+  setOverlay: function (id) {
+    _div_overlay = id;
+  },
+  getOverlay: function () {
+    return document.getElementById(_div_overlay);
+  },
+  setFrame: function (id) {
+    _iframe = id;
+  },
+  getFrame: function () {
+    return document.getElementById(_iframe);
+  },
+  actions: function (cmd, value = "") {
+    if (cmd == "bannerLoadSuccess") {
+      if (
+        NamespaceWidget.getUUID() == "AF066CB0-3CFD-401E-A79A-9FFCA24A650C" &&
+        window.location.pathname.indexOf("/detalhamento-do-pedido/") > -1
+      ) {
+        var total = document.querySelector(
+          ".page__confirm .resume__payment div:last-of-type strong"
+        ).innerText;
+        var ordernumber = document.querySelector(
+          ".page__confirm .header span"
+        ).innerHTML;
+        total = total.replace("R$", "").trim();
+        total = total.replace(".", "").replace(",", ".");
+        if (Number(total) > 150) {
+          NamespaceWidget.show(ordernumber);
+        }
+      } else {
+        NamespaceWidget.show();
+      }
+    }
+
+    if (cmd == "bannertracking") {
+      NamespaceWidget.bannertracking(value.status, value.trigger, value.origin);
+    } else if (cmd == "closeBanner") {
+      NamespaceWidget.closeBanner();
+    } else if (cmd == "openBanner") {
+      NamespaceWidget.show();
+      var promo = NamespaceWidget.getContainer("promo");
+
+      if (promo && promo !== null) promo.style.zIndex = "0";
+    } else if (cmd == "sendMail") {
+      var _ve_session = NamespaceWidget.getSession();
+      NamespaceWidget.setSession(_ve_session, "email", value);
+    } else if (cmd == "openBannerCall") {
+      var banner = NamespaceWidget.getContainer("call");
+
+      if (banner && banner !== null) {
+        banner.style.maxWidth = "340px";
+        banner.style.height =
+          parseInt(value.height) < 550 ? "550px" : value.height + "px";
+      }
+    } else if (cmd == "closeBannerCall") {
+      var banner = NamespaceWidget.getContainer("call");
+
+      if (banner && banner !== null) {
+        banner.style.maxWidth = "80px";
+        banner.style.height = "80px";
+      }
+    }
+  },
+  closeBanner: function (closeOnOutClick = false) {
+    var _banner_ativo = NamespaceWidget.getBanner();
+    var _ve_session = NamespaceWidget.getSession();
+    if (!isEtagOnUTM) {
+      // localStorage.setItem("_etag_conversions", window.location.href + "?utm_source=EtagPanel");
+      this.setCookie(
+        "_etag_conversions",
+        window.location.href + "?utm_source=EtagPanel",
+        //btoa(window.location.href + "?utm_source=EtagPanel"),
+        0
+      );
+    }
+
+    var overlay = NamespaceWidget.getOverlay();
+    var banner = NamespaceWidget.getContainer();
+
+    document.body.style.margin = "0";
+
+    if (banner) banner.style.right = "-440px";
+
+    if (overlay) {
+      overlay.style.opacity = "0";
+      overlay.style.zIndex = "-1";
+    }
+
+    //MANTEM ESTADO ORIGINAL DO PROMO WIDGET
+    var promo = NamespaceWidget.getContainer("promo");
+    if (promo && promo !== null) promo.style.zIndex = "99999999999999";
+
+
+    //grava pixel de fechamento do banner 
+    if(closeOnOutClick)
+      NamespaceWidget.bannertracking("closed", closeOnOutClick, 'click_screen');
+  },
+  cleanRickText: function (string) {
+    if (string === null || string === "" || typeof string == "undefined")
+      return null;
+    else if (string) {
+      str = string.replace(/&nbsp;/g, "").replace(/\u00a0/g, "");
+      return str.trim();
+    }
+    return string;
+  },
+  clean: function (string) {
+    if (string === null || string === "" || typeof string == "undefined")
+      return null;
+    else if (string) {
+      //LIMPA CARACTERES HTML DA STRING
+      str = string
+        .replace(/<[^>]*>/g, "")
+        .replace(/&nbsp;/g, "")
+        .replace(/\u00a0/g, "");
+      return str.trim();
+    }
+    return string;
+  },
+  cleanNumbers: function (string) {
+    if (string === null || string === "" || typeof string == "undefined")
+      return 0;
+    else if (string) {
+      //LIMPA CARACTERES HTML DA STRING
+      str = string.match(/\d+/g);
+      if (str === null || str === "" || typeof str == "undefined") return 0;
+
+      str = str.toString().trim();
+
+      //troca virgula por ponto
+      str = str.replace(/,/g, ".");
+      //transforma em numero float
+      if ((str.match(/[.]/g) || []).length > 1) {
+        str = str.replace(".", "");
+      }
+
+      str = parseFloat(str);
+      return str;
+    }
+    return 0;
+  },
+  scheme: function (key) {
+    var mapper = {"produtos":{"page":["https:\/\/www.nespresso.com\/br\/pt\/order\/*\/*\/*"],"setup":{"pImage_pp":{"domevent":"rerender","classe":"#ProductDetails nb-img img, .ProductDetailsImage-wrapper img","excluido":"nao","htmlAttribute":"src","fieldType":"raw"},"pName_pp":{"domevent":"rerender","classe":"#ProductDetails .cb-content .cb-heading","excluido":"nao","htmlAttribute":"innerHTML","fieldType":"raw"},"pCode_pp":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"pUnitPrice_pp":{"domevent":"rerender","classe":"#ProductDetails .cb-price-current span, .ProductDetails .ProductDetails__price","excluido":"nao","htmlAttribute":"innerHTML","fieldType":"raw"},"pDescription_pp":{"domevent":"rerender","classe":"#ProductDetails nb-pdp-context .cb-inner, n-pdp-description .c-pdp-description p","excluido":"nao","htmlAttribute":"richtext","fieldType":"raw"},"pCategory_pp":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"pURL_pp":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""}}},"carrinho":{"page":["https:\/\/www.nespresso.com\/br\/pt\/guestcheckout#\/delivery","https:\/\/www.nespresso.com\/br\/pt\/secure\/login?destination-redirect=\/br\/pt\/checkout"],"setup":{"pImage_b":{"domevent":"rerender","classe":".MiniBasketDropdown__dropdown .MiniBasketDropdown__content-categories .MiniBasketItem th img","excluido":"nao","htmlAttribute":"src","fieldType":"rawseries"},"pName_b":{"domevent":"rerender","classe":".MiniBasketItem__title > span:first-child","excluido":"nao","htmlAttribute":"innerHTML","fieldType":"rawseries"},"pURL_b":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"pCode_b":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"pCategory_b":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"pDescription_b":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"pQuantity_b":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"pUnitPrice_b":{"domevent":"rerender","classe":".MiniBasketItem__title .MiniBasketItemPriceAndName__price","excluido":"nao","htmlAttribute":"innerHTML","fieldType":"rawseries"},"TotalBasket_b":{"domevent":"rerender","classe":".MiniBasketFooter .MiniBasketTotalTable__totalPrice-value","excluido":"nao","htmlAttribute":"innerHTML","fieldType":"raw"},"PromoCode_b":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""}}},"checkout":{"page":["https:\/\/www.nespresso.com\/br\/pt\/secure\/login?destination-redirect=\/br\/pt\/checkout","https:\/\/www.nespresso.com\/br\/pt\/registration?execution=e1s1","https:\/\/www.nespresso.com\/br\/pt\/guestcheckout#\/delivery"],"setup":{"Email":{"domevent":"rerender","classe":"#main #loginFormBlock #loginContainer #loginForm .input-group .input-row .input-container input","excluido":"nao","htmlAttribute":"value","fieldType":"raw"},"Name":{"domevent":"","classe":"","excluido":"nao","htmlAttribute":"","fieldType":""},"EmailCadastro":{"domevent":"rerender","classe":".PageRegistration input[type=email]","excluido":"nao","htmlAttribute":"value","fieldType":"raw"},"EmailDelivery":{"domevent":"rerender","classe":".GuestCheckout input#email","excluido":"nao","htmlAttribute":"value","fieldType":"raw"},"EmailLoginDropDown":{"domevent":"rerender","classe":".LoginDropdown .LoginDropdown__dropdown .LoginDropdown__container input[type=email]","excluido":"nao","htmlAttribute":"value","fieldType":"raw"}}},"confirmacao":{"page":["https:\/\/payment.nespresso.com\/*","https:\/\/www.nespresso.com\/br\/pt\/checkout\/orderConfirmation","https:\/\/www.nespresso.com\/br\/pt\/checkout\/*"],"setup":{"OrderNumber":{"domevent":"onload","classe":"#adyen-container .adyen-checkout__voucher-result__code span, main.checkout .checkout-order-confirmation__title-confirmation","excluido":"nao","htmlAttribute":"innerHTML","fieldType":"raw"}}}};
+
+    if (key != null) return mapper[key];
+
+    return mapper;
+  },
+  schemeCaptured: function (key = null, data) {
+    if (key !== null) return data[key] ? data[key] : null;
+
+    return data;
+  },
+  show: function (ordernumber = null) {
+    var overlay = NamespaceWidget.getOverlay();
+    var container = NamespaceWidget.getContainer();
+    var frame = NamespaceWidget.getFrame();
+
+    container.style.right = "0";
+
+    overlay.style.opacity = "0.8";
+    overlay.style.zIndex = "99999999999";
+
+    var iframe = document.getElementById(frame.id).contentWindow;
+    iframe.postMessage(
+      { cmd: "showProducts", value: NamespaceWidget.getUUID() },
+      "*"
+    );
+    if (ordernumber) {
+      iframe.postMessage({ cmd: "updateBannerUrl", value: ordernumber }, "*");
+    }
+  },
+  updateBannerImage: function (selector, value) {
+    var iframe = document.getElementById(
+      NamespaceWidget.getFrame().id
+    ).contentWindow;
+
+    iframe.postMessage(
+      { cmd: "updateBannerImage", value: { selector: selector, src: value } },
+      "*"
+    );
+  },
+  setConfigs: function (configs, key = "", value = "") {
+    if (key != "" && value != "") configs[key] = value;
+    configs = JSON.stringify(configs);
+    localStorage.setItem("veConfigs", configs);
+  },
+  getConfigs: function () {
+    return localStorage.getItem("veConfigs");
+  },
+  setConversion: function (configs, key = "", value = "") {
+    if (key != "" && value != "") configs[key] = value;
+    configs = JSON.stringify(configs);
+    // localStorage.setItem("etagConversion", configs);
+    this.setCookie(
+      "etagConversion",
+      //configs,
+      btoa(encodeURIComponent(configs)),
+      0
+    );
+  },
+  getConversion: function () {
+    return !!this.getCookie("etagConversion") // localStorage.getItem("etagConversion")
+      ? JSON.parse(decodeURIComponent(atob(this.getCookie("etagConversion")))/*localStorage.getItem("etagConversion")*/)
+      : this.setConversion({});
+  },
+  setBanner: function (banner) {
+    _ve_banner = banner;
+  },
+  getBanner: function () {
+    return _ve_banner;
+  },
+  setRerender: function (element) {
+    _reRenderElements.push(element);
+  },
+  setSession: function (configs, key = "", value = "") {
+    if (key != "" && value != "") configs[key] = value;
+    var session = JSON.stringify(configs);
+    sessionStorage.setItem("veSession", session);
+  },
+  getSession: function () {
+    return sessionStorage.getItem("veSession") === null ||
+      sessionStorage.getItem("veSession") === "" ||
+      typeof sessionStorage.getItem("veSession") == "undefined"
+      ? this.setSession({
+          uid: this.getUUID(),
+          sessionId: this.uuidv4(),
+          funnel: "visit",
+          total: 0,
+        })
+      : JSON.parse(sessionStorage.getItem("veSession"));
+  },
+  uuidv4: function () {
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+      (
+        c ^
+        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+      ).toString(16)
+    );
+  },
+  getPixelConversion: function () {
+    return document.body.querySelector("img[src^='https://bossanova.etagdigital.com.br/api/conversion/convert?id=FC9B5739-4FB0-4DD5-8157-084BFEA10C20&tracking_id=afbe72c07131bf8128d2806d7119d1744e8324f2-5132b4f2af35ad2ca7d265d40bb7fb8d3165f4ab']");
+  },
+  setCookie: function (name, value, days) {
+    var expires = "";
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; domain=" + this.getRootDomain(window.location.href);
+  },
+  getCookie: function (name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  },
+  eraseCookie: function (name) {
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Max-Age=-9999; domain=" + this.getRootDomain(window.location.href)
+  },
+  validateEmail: function (email) {
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  },
+  getURLParameter: function (sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split("&");
+    for (var i = 0; i < sURLVariables.length; i++) {
+      var sParameterName = sURLVariables[i].split("=");
+      if (sParameterName[0].trim() == sParam.trim()) {
+        console.log("getParam URL", sParameterName[1]);
+        return sParameterName[1];
+      }
+    }
+
+    return null;
+  },
+  setUTM: function () {},
+  getUTM: function () {},
+  clearConversions: function () {},
+
+
+  isMobile: function () {
+    return ((agent) => {
+      return (
+        /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(
+          agent
+        ) ||
+        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+          agent.substr(0, 4)
+        )
+      );
+    })(navigator.userAgent || navigator.vendor || window.opera);
+  },
+  getMobileOS: function() {
+    let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let isAndroid = /Android/i.test(navigator.userAgent);
+
+    if (isIOS) return "IOS";
+    if (isAndroid) return "Android";
+    return "Other Mobile OS";
+  },
+  getDevice: function (){
+    if (this.isMobile()) return this.getMobileOS();
+    return "Desktop";
+  },
+  postDevice: function (){
+    fetch(
+      `https://bossanova.etagdigital.com.br/api/conversion/?uuid=${this.getUUID()}&device=${this.getDevice()}&sessionid=${this.getSession().sessionId}`
+    );
+  },
+  getRootDomain: function (url) {
+    if (typeof url === 'string')
+        url = new URL(url);
+    var domain = url.hostname;
+    var elems = domain.split('.');
+    var iMax = elems.length - 1;
+    var elem1 = elems[iMax - 1];
+    var elem2 = elems[iMax];
+    var isSecondLevelDomain = iMax >= 2 && (elem1 + elem2).length <= 5;
+    return (isSecondLevelDomain ? elems[iMax - 2] + '.' : '') + elem1 + '.' + elem2;
+  },
+  bannertracking: function (event, trigger, origin="") {
+    const status = "tagAssist-" + event;
+    const rootURL = window.location.href.split("?")[0];
+    trigger = (NamespaceWidget.isMobile() ? 'mobile_': 'desktop_') + trigger;
+
+    var url =
+        BASE_API_TAG +
+        "/api/conversion?uuid=" + NamespaceWidget.getUUID() +
+        "&status=" + status +
+        "&idbanner=" + NamespaceWidget.getBanner().idbanner +
+        "&origin=" + origin +
+        "&device=" + NamespaceWidget.getDevice() +
+        "&sessionid=" + NamespaceWidget.getSession().sessionId+
+        "&trigger=" + trigger +
+        "&cartfilled=" + +(NamespaceWidget.getSession().formCapture.carrinho.produtos.length > 0)+
+        "&location=" + rootURL;
+
+    fetch(url);
+  }
+};
+
+var BASE_URL_AMAZON = "https://s3.amazonaws.com/files.etagdigital.com.br";
+var BASE_API_TAG = "https://bossanova.etagdigital.com.br";
+var BASE_API_MONGO = "https://api.etagdigital.com.br";
+var BASE_API_MONGO_EMAIL = "https://api.etagdigital.com.br/emails/";
+
+// Delay para iniciar tag
+var initDelay = 3000;
+
+//Aumenta Delay para casos pontuais de sites lentos
+// if(NamespaceWidget.getUUID() == 'D6ADD234-B7E2-4B5E-93C3-0A302231E954') // Drogaria Venâncio
+//   initDelay = 4000;
+
+setTimeout(function () {
+  Object.create(NamespaceWidget).init();
+
+  var bodyCarregado = false;
+  var timeout = 0;
+  var _show = false;
+  var stopElementsFiring = [];
+  var jaRenderizado = false;
+  var o, n;
+
+  function init1() {
+    if (
+      document.querySelector('[id^="ve_overlay_"]') ||
+      document.querySelector('[id^="e_tag_"]')
+    ) {
+      return;
+    }
+
+    if (!document.body) {
+      setTimeout(function () {
+        init1();
+      }, 50);
+      return;
+    }
+    bodyCarregado = true;
+
+    var ov = "ve_overlay_" + 1e4 * Math.random();
+    o = document.createElement("div");
+    if (closeOnOutClick) o.onclick = () => NamespaceWidget.closeBanner(true);
+    o.id = ov;
+    o.style.position = "fixed";
+    o.style.left = "0";
+    o.style.top = "0";
+    o.style.width = "100%";
+    o.style.height = "100%";
+    o.style.background = "#363636cc";
+    o.style.opacity = "0";
+    o.style.zIndex = "-1";
+    o.style.transition = "1s cubic-bezier(.165,.84,.44,1)";
+    document.body.appendChild(o);
+
+    NamespaceWidget.setOverlay(o.id);
+
+    var t = "e_tag_" + 1e4 * Math.random();
+    n = document.createElement("div");
+    n.id = t + "_d";
+    n.style.position = "fixed";
+    n.style.right = "-440px";
+    n.style.top = "0";
+    n.style.height = "100%";
+    n.style.width = "100%";
+    n.style.maxWidth = "440px";
+    n.style.zIndex = "9999999999999999999999";
+    n.style.transition = "0.9s cubic-bezier(.165,.84,.44,1)";
+    document.body.appendChild(n);
+
+    NamespaceWidget.setContainer(n.id);
+
+    ;
+
+    window.onload = function () {
+      renderScript();
+    };
+
+    var _intervalo = setInterval(function () {
+      renderScript();
+    }, 100);
+
+    function renderScript() {
+      if (!bodyCarregado) return;
+      if (jaRenderizado) return;
+      jaRenderizado = true;
+      clearInterval(_intervalo);
+       var banners = [{"name":"NESPRESSO-FRETE-ALWAYS-ON","idbanner":"280","tipo":"Promo Message","pages_on_fire":[{"id":"624","idbanner":"280","url":"https:\/\/www.nespresso.com\/br\/pt\/*\/*\/*\/*","excluido":"nao"},{"id":"623","idbanner":"280","url":"https:\/\/www.nespresso.com\/br\/pt\/*\/*\/*","excluido":"nao"}],"elements_on_block":[],"last_tab":"false","firing_sessions":"1","elements_stopping_click":["Array"]}];
+
+			//banners do servidor
+				
+			var configs = NamespaceWidget.getConfigs();
+
+			configs = JSON.parse(configs);
+				//console.log("banners", banners);
+
+			for(var x = 0; x < banners.length; x++)
+			{
+				var banner = banners[x];
+				stopElementsFiring = banners[x].elements_stopping_click;
+				//console.log("STOP FIRING", stopElementsFiring);
+
+				var match = veMatch(banner);
+
+
+				if(banner.tipo == "Widget Call")
+				{
+					
+						
+				//BANNER CALL
+				var _t = "e_tag_call_" + 1e4 * Math.random();
+			    c = document.createElement("div");
+			    c.id = _t + "_d", 
+			    c.style.position = "fixed",
+				c.style.left = "30px",
+				c.style.bottom = "30px",
+				c.style.height = "80px", 
+				c.style.width = "100%",
+				c.style.maxWidth = "80px",  
+				c.style.zIndex = "9999999999999999999999"; 
+			    c.style.transition = "0.9s cubic-bezier(.165,.84,.44,1)", 
+			    c.style.display = "none",
+			    document.body.appendChild(c);
+
+			    NamespaceWidget.setContainer(c.id, "call");
+				
+
+
+					//CARREGA IFRAME DO BANNER CALL
+					var i = document.createElement("iframe");
+					i.id = _t + "_f", 
+					i.scrolling = "no",
+					i.src = BASE_API_TAG + "/public/banners/"+NamespaceWidget.getUUID()+"_call_"+banner.idbanner+".html?v=" + 1e4 * Math.random()+"&sessionid="+NamespaceWidget.getSession().sessionId+"&siteid="+NamespaceWidget.getUUID()+"&bannerid="+banner.idbanner+"&device="+NamespaceWidget.getDevice(), 
+					i.style.border = "0px none", 
+					i.style.width = "100%", 
+					i.style.height = "100%", 
+					i.style.display = "block !important", 
+					c.appendChild(i);
+				}
+
+				if(match && banner.tipo != "Widget Call")
+				{
+					// console.log("match");
+					//CARREGA IFRAME DO BANNER
+					var i = document.createElement("iframe");
+					i.id = t + "_f", 
+					i.scrolling = "no",
+					i.src = BASE_URL_AMAZON + "/banners/"+NamespaceWidget.getUUID()+"_"+banner.idbanner+".html?v=" + 1e4 * Math.random()+"&sessionid="+NamespaceWidget.getSession().sessionId+"&siteid="+NamespaceWidget.getUUID()+"&bannerid="+banner.idbanner+"&device="+NamespaceWidget.getDevice(), 
+					i.style.border = "0px none", 
+					i.style.width = "100%", 
+					i.style.height = "100%", 
+					n.appendChild(i);
+
+					NamespaceWidget.setFrame(i.id);
+
+					banner.impressions = 0;
+					timeout = 0;
+					_show = false;
+					NamespaceWidget.setBanner(banner);
+					firingScript(banner);
+					//openBanner(banner);
+					break;
+				}
+
+			}
+			;
+    }
+  }
+
+  init1();
+
+  
+
+			function firingScript(banner)
+			{
+				//HABILITA FUNCAO DE DISPARO LAST_TAB
+				if(banner.last_tab == true || banner.last_tab == "true")
+				{
+					//alert("last tab")
+					if(!NamespaceWidget.getCookie("bossa_tabIndex") || NamespaceWidget.getCookie("bossa_tabIndex") == null)
+					{
+						NamespaceWidget.setCookie("bossa_tabIndex", 1, 0);	
+						NamespaceWidget.setSession(NamespaceWidget.getSession(), "tabIndex", 1);
+					}
+					else if(Number.parseInt(NamespaceWidget.getCookie("bossa_tabIndex")) >= 1 && (!NamespaceWidget.getSession().tabIndex || typeof NamespaceWidget.getSession().tabIndex == "undefined"))
+					{
+						//INCREMENTA O INDICE
+						NamespaceWidget.setCookie("bossa_tabIndex", Number.parseInt(NamespaceWidget.getCookie("bossa_tabIndex")) + 1, 0);	
+						NamespaceWidget.setSession(NamespaceWidget.getSession(), "tabIndex", Number.parseInt(NamespaceWidget.getCookie("bossa_tabIndex")));
+					}
+
+					if(Number.parseInt(NamespaceWidget.getSession().tabIndex) >= Number.parseInt(NamespaceWidget.getCookie("bossa_tabIndex")))
+					{
+						NamespaceWidget.setCookie("bossa_sessionId", NamespaceWidget.getSession().sessionId, 0);
+					}
+				}
+			
+
+					if(banner.idbanner == 323)
+					{
+
+			    		
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 292)
+					{
+			    		
+					
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 280)
+					{
+			    		
+					
+					
+
+			    
+						    document.addEventListener("mousemove", function(event) {
+						        //console.log("move")
+						        if (timeout !== null) { 
+						            clearTimeout(timeout);
+						        }
+
+						        if(!_show)
+						        {
+									
+							if( navigator.userAgent.match(/Android/i)
+							|| navigator.userAgent.match(/webOS/i)
+							|| navigator.userAgent.match(/iPhone/i)
+							|| navigator.userAgent.match(/iPad/i)
+							|| navigator.userAgent.match(/iPod/i)
+							|| navigator.userAgent.match(/BlackBerry/i)
+							|| navigator.userAgent.match(/Windows Phone/i)
+							)
+							{}
+							else
+							{
+						        timeout = setTimeout(function() {
+										openBanner(banner, "desktop_inactivity");
+							        }, 480000);
+							
+						    }
+					        
+								////console.log("POSICAO MOUSE", event.screenY);
+						        //EVENTO MOUSE SAIR DA TELA
+						        if(event.y <= 50)
+						        {
+						        	timeout = setTimeout(function() {
+										openBanner(banner, "desktop_exit_passive");
+									}, 5000);
+						        }
+
+					        	} 
+								});
+
+			    
+							if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) 
+							{
+								
+
+								    document.addEventListener("touchmove", function(event) {
+								        //console.log("move")
+								        if (timeout !== null) { 
+								            clearTimeout(timeout);
+								        }
+
+								        if(!_show)
+								        {
+									        timeout = setTimeout(function() {
+									        	//alert("disparo MOBILE");
+												openBanner(banner, "mobile_inactivity");
+									        }, 480000);
+
+								    	}
+
+
+
+								    });
+						    
+					        
+
+
+									//document.addEventListener("showkeyboard", function(){alert("showkeyboard")});
+
+										window.addEventListener("blur", function(e){
+
+											if(!_show)
+											{
+												
+												timeout = setTimeout(function() {
+													openBanner(banner, "mobile_lostFocus");
+												}, 0);
+											}
+
+										}); 
+									}
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 260)
+					{
+			    		
+					
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 257)
+					{
+			    		
+					
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 235)
+					{
+			    		
+					
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 234)
+					{
+			    		
+					
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 233)
+					{
+			    		
+					
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				
+					else if(banner.idbanner == 216)
+					{
+			    		
+					
+					
+
+			    
+
+			    
+
+			}
+	    
+
+
+
+
+				};
+
+  function openBanner(banner, trigger = '') {
+    //SE LAST_TAB ATIVO
+    if (
+      (banner.last_tab == "true" || banner.last_tab == true) &&
+      NamespaceWidget.getCookie("bossa_sessionId") !== null &&
+      typeof NamespaceWidget.getCookie("bossa_sessionId") !== "undefined" &&
+      NamespaceWidget.getCookie("bossa_sessionId") !=
+        NamespaceWidget.getSession().sessionId
+    )
+      return false;
+
+    //VERIFICA SE EXISTE BLOQUEIO POR ELEMENTOS DA PAGINA
+    if (banner.elements_on_block && banner.elements_on_block.length > 0) {
+      for (var x = 0; x < banner.elements_on_block.length; x++) {
+        var element = document.querySelector(
+          banner.elements_on_block[x].element
+        );
+        if (element && element !== null) {
+          return false;
+        }
+      }
+    }
+
+    //SPA -- Verifica se a pagina atual ainda é valida
+    if(!veMatch(banner))
+      return false;
+
+
+    var testAd = document.createElement("div");
+    testAd.innerHTML = "&nbsp;";
+    testAd.className = "adsbox";
+    document.body.appendChild(testAd);
+
+    if (testAd.offsetHeight === 0) {
+      testAd.remove();
+      return false;
+    }
+
+    var configs = NamespaceWidget.getConfigs();
+    configs = JSON.parse(configs);
+    if (configs == null) {
+      NamespaceWidget.setConfigs(banner);
+      configs = banner;
+    }
+
+    //VERIFICA SE JA EXPIROU A SESSAO ANTERIOR
+    if (configs.updated_at) {
+      var last_session = new Date(configs.updated_at);
+
+      last_session.setHours(last_session.getHours() + 1);
+      //REFRESH SESSION PANEL
+      if (new Date().getTime() > last_session) {
+        NamespaceWidget.setConfigs(banner);
+        configs = banner;
+      }
+    }
+    if (configs && parseInt(configs.firing_sessions) <= 0) {
+      testAd.remove();
+      return false;
+    }
+
+    //grava pixel de abertura do banner
+    if (_show == false)
+      NamespaceWidget.bannertracking("displayed", trigger);
+
+    _show = true;
+    configs.impressions++;
+    configs.firing_sessions = parseInt(configs.firing_sessions) - 1;
+    configs.updated_at = new Date().getTime();
+    NamespaceWidget.setConfigs(configs);
+    var frame = NamespaceWidget.getFrame();
+    var iframe = document.getElementById(frame.id).contentWindow;
+    iframe.postMessage({ cmd: "checkIFrameState" }, "*");
+  }
+
+  function veMatch(banner) {
+    banner.pages_on_fire =
+      typeof banner.pages_on_fire === "string" ||
+      banner.pages_on_fire instanceof String
+        ? JSON.parse(banner.pages_on_fire)
+        : banner.pages_on_fire;
+
+    if (banner.pages_on_fire.length > 0) {
+      for (var x = 0; x < banner.pages_on_fire.length; x++) {
+        if (banner.pages_on_fire[x].url == null) continue;
+
+        //IGNORA A / NO FINAL DA STRING
+        if (
+          window.location.href.replace(/\/+$/, "") ==
+          banner.pages_on_fire[x].url.replace(/\/+$/, "")
+        ) {
+          return true;
+        } else {
+          var url_test = window.location.href;
+          var urlEntrada = banner.pages_on_fire[x].url;
+          urlEntrada = urlEntrada.replace(/\//g, "\\/");
+          urlEntrada = urlEntrada.replace(/\./g, "\\.");
+          urlEntrada = urlEntrada.replace(/\?/g, "\\?");
+          urlEntrada = urlEntrada.replace(/\*/g, "((?!\\/).)*");
+          urlEntrada = urlEntrada.replace(/\+/g, "((?!\\/).)+");
+          urlEntrada = "^" + urlEntrada + "$";
+          var _regText = new RegExp(urlEntrada).test(url_test);
+          if (_regText) {
+            return true;
+          }
+        }
+      }
+    } else {
+      return true;
+    }
+    return false;
+  }
+
+  function urlPatternToRegExp(url) {
+    var url_pattern = url.replace(/\*/g, ".*?");
+    return url_pattern;
+  }
+
+  
+}, initDelay);

@@ -1,0 +1,52 @@
+(function () {
+    var ID_PAGE_BUILDER_PROJECT = 'page-builder-next-v1'
+    var ID_PAGE_BUILDER_DATA_VERTUO = 'page-builder-data-next-v1-vertuo'
+    var ID_PAGE_BUILDER_DATA_ORIGINAL = 'page-builder-data-next-v1-original'
+    var ID_PAGE_BUILDER_DATA_PRO = 'page-builder-data-next-v1-pro'
+
+    var isIE = function () {
+        return /Trident\/|MSIE/.test(window.navigator.userAgent)
+    }
+
+    var isVertuo = function () {
+        return window.location.pathname.indexOf('vertuo') !== -1
+    }
+
+    var isOriginal = function () {
+        return window.location.pathname.indexOf('original') !== -1
+    }
+
+    var isPro = function () {
+        return window.location.pathname.indexOf('pro') !== -1
+    }
+
+    var getPageBuilderJson = function (id) {
+        var data = JSON.parse(document.getElementById(id).innerHTML)
+        data.id = ID_PAGE_BUILDER_PROJECT
+        return data
+    }
+
+    var initNEXTV1PLP = function () {
+        if (isIE()) {
+            return
+        }
+
+        window.nwc = window.nwc || {}
+        window.nwc.projects = window.nwc.projects || []
+
+        if (isVertuo()) {
+            window.nwc.projects.push(getPageBuilderJson(ID_PAGE_BUILDER_DATA_VERTUO))
+        } else if (isOriginal()) {
+            window.nwc.projects.push(getPageBuilderJson(ID_PAGE_BUILDER_DATA_ORIGINAL))
+        } else if (isPro()) {
+            window.nwc.projects.push(getPageBuilderJson(ID_PAGE_BUILDER_DATA_PRO))
+        } else {
+            window.nwc.projects.push(getPageBuilderJson(ID_PAGE_BUILDER_DATA_ORIGINAL))
+        }
+
+        window.nwc.load && window.nwc.load()
+    }
+    initNEXTV1PLP()
+})()
+
+

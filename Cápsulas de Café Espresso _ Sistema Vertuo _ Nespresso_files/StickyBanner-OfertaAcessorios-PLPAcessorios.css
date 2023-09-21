@@ -1,0 +1,411 @@
+@font-face {
+    font-family: Lucas;
+    src: url(https://www.nespresso.com/shared_res/agility/commons/fonts/NespressoLucas-Light.woff) format("woff");
+    font-style: normal;
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: Lucas;
+    src: url(https://www.nespresso.com/shared_res/agility/commons/fonts/NespressoLucas-Regular.woff) format("woff");
+    font-style: normal;
+    font-weight: 400;
+}
+
+
+@font-face {
+    font-family: Lucas;
+    src: url(https://www.nespresso.com/shared_res/agility/commons/fonts/NespressoLucas-Bold.woff) format("woff");
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: Lucas;
+    src: url(https://www.nespresso.com/shared_res/agility/commons/fonts/NespressoLucas-XtraBd.woff) format("woff");
+    font-style: normal;
+    font-weight: 800;
+}
+
+#buttonStock {
+    display: none;
+}
+
+/* LIVECHAT PROACTIVE */
+#nespresso-livechat.nlc-collapse {
+    bottom: 60px;
+}
+
+#nespresso-livechat.nlc-collapse.is-no-animation {
+    bottom: 60px;
+}
+
+#nespresso-livechat.nlc-collapse.is-animation {
+    bottom: 60px;
+}
+
+#nespresso-livechat.is-animation.nlc-expand {
+    bottom: 60px;
+}
+
+/* LIVECHAT PROACTIVE */
+.stickyBannerHide {
+    display: none;
+}
+
+#stickyBannerBack {
+    background-color: #8d6f40;
+    position: fixed;
+    bottom: 0px;
+    z-index: 999;
+    width: 100%;
+}
+
+#stickyBanner {
+    background-color: #112339;
+    color: #fff;
+    padding: 17px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+#stickyBanner #stockMessage h2 {
+    font-family: Lucas, 'NespressoLucas-Bold', Arial, Helvetica, sans-serif;
+    color: #fff;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.2em;
+    margin: 0;
+    margin-top: 4px;
+}
+
+#stickyBanner #stockMessage p {
+    font-family: Lucas, 'NespressoLucas-Regular', Arial, Helvetica, sans-serif;
+    font-weight: 400;
+    color: #fff;
+    margin: 0;
+    margin-top: 5px;
+    font-size: 15px;
+}
+
+#orderCpasCta {
+    margin-top: 5px;
+}
+
+#stickyBannerCta {
+    margin-top: -2px;
+    float: right;
+    background-color: #3D8705;
+    padding: 10px 50px;
+    border-radius: 3px;
+}
+
+#stickyBannerCta:hover {
+    background-color: #112339;
+}
+
+#stickyBannerReOrder {
+    font-family: Lucas, 'NespressoLucas-Regular', Arial, Helvetica, sans-serif;
+    font-weight: 500;
+    text-align: center;
+    display: block;
+    width: 130px;
+    line-height: 13px;
+    padding: 4px 5px;
+    float: right;
+    right: 10px;
+    bottom: 5px;
+    position: absolute;
+}
+
+#stickyBannerCopy {
+    display: flex;
+    align-items: flex-start;
+    padding-left: 50px;
+}
+
+#stickyBannerCopy img {
+    margin-top: -110px;
+    margin-left: -14px;
+    width: 140px;
+    float: none;
+}
+
+#aeroLink {
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+#stickyBannerClose {
+    color: #fff;
+    background-color: #112339;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid;
+    font-family: Lucas;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -14px;
+    font-weight: 700;
+}
+
+#aeroAdd {
+    font-size: 12px;
+    font-family: Lucas, 'NespressoLucas-Regular', Arial, Helvetica, sans-serif;
+    font-weight: 500;
+}
+
+.slide-out-bottom {
+    -webkit-animation: slide-out-bottom 0.5s cubic-bezier(0.550, 0.085, 0.680, 0.530) both;
+    animation: slide-out-bottom 0.5s cubic-bezier(0.550, 0.085, 0.680, 0.530) both;
+}
+
+@-webkit-keyframes slide-out-bottom {
+    0% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        -webkit-transform: translateY(1000px);
+        transform: translateY(1000px);
+        opacity: 0;
+    }
+}
+
+@keyframes slide-out-bottom {
+    0% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        -webkit-transform: translateY(1000px);
+        transform: translateY(1000px);
+        opacity: 0;
+    }
+}
+
+.slide-in-bottom {
+    -webkit-animation: slide-in-bottom 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    animation: slide-in-bottom 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@-webkit-keyframes slide-in-bottom {
+    0% {
+        -webkit-transform: translateY(1000px);
+        transform: translateY(1000px);
+        opacity: 0;
+    }
+
+    100% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-in-bottom {
+    0% {
+        -webkit-transform: translateY(1000px);
+        transform: translateY(1000px);
+        opacity: 0;
+    }
+
+    100% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#see-conditions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-width: 120px;
+    margin-left: 20px;
+    text-align: center;
+    margin: 0 15px 0 auto;
+}
+
+/*#see-conditions a {
+    font-family: Lucas;
+    color: #FFF;
+    text-decoration: underline;
+    font-weight: 700;
+    text-align: right;
+    font-size: 13px;
+}*/
+
+#popup-terms {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: none;
+}
+
+#popup-content {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    width: 590px;
+    height: 590px;
+    transform: translate(-50%, -50%);
+    background: #FFF;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+}
+
+#popup-content h2 {
+    text-align: center;
+    font-family: Lucas;
+    padding-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1.7px;
+    color: #000;
+    font-size: 16px;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+#popup-content p {
+    font-family: Lucas;
+    color: #000;
+    font-size: 16px;
+    line-height: 1.5em;
+    text-align: center;
+}
+
+.popup-title {
+    position: relative;
+}
+
+.popup-close {
+    position: absolute;
+    right: 0;
+    top: -10px;
+    cursor: pointer;
+}
+
+.popup-close::before,
+.popup-close::after {
+    content: '';
+    display: block;
+    width: 25px;
+    height: 2px;
+    background: #000;
+    position: relative;
+    cursor: pointer;
+}
+
+.popup-close::before {
+    transform: rotate(45deg);
+    top: 1.5px;
+}
+
+.popup-close::after {
+    transform: rotate(-45deg);
+    bottom: 1.5px;
+}
+
+.popup-overflow {
+    flex: 1;
+    overflow-y: scroll;
+}
+
+#popup-mask {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+@media only screen and (max-width: 995px) {
+    #stickyBanner {
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 12px;
+    }
+
+    #stickyBannerReOrder {
+        float: right;
+        margin-right: 20px;
+    }
+
+    #stickyBannerClose {
+        left: auto;
+        right: 50px;
+    }
+
+    #stickyBannerCopy {
+        padding-left: 0;
+    }
+
+    #stickyBannerCopy img {
+        margin-top: -92px;
+        width: 123px;
+    }
+
+    #stickyBannerCopy #stockMessage {
+        padding-left: 6px;
+    }
+
+    #stickyBanner #stockMessage h2 {
+        font-size: 17px;
+    }
+
+    #stickyBanner #stockMessage p {
+        font-size: 16px;
+    }
+
+    #see-conditions {
+        text-align: right;
+        min-width: auto;
+        margin: 5px 5px 0 auto;
+    }
+
+    #see-conditions a {
+        font-size: 12px;
+    }
+
+}
+
+@media only screen and (max-width: 650px) {
+    #popup-content {
+        width: 90%;
+        height: 80%;
+        padding: 20px 15px;
+        padding: 40px 30px;
+    }
+}
+
+@media only screen and (max-width: 420px) {
+
+    #stickyBanner #stockMessage h2,
+    #stickyBanner #stockMessage p {
+        line-height: 1.2em;
+    }
+
+    #stickyBannerClose {
+        right: 20px;
+    }
+}

@@ -1,0 +1,2 @@
+/*! 2023-16-08 15:05  */
+var recaptcha=function(){"use strict";function a(){try{g()}catch(a){window.recaptchaReloaded=function(){g()}}}function b(){null!==f&&grecaptcha.reset()}function c(){return null!==f?grecaptcha.getResponse(f):""}function d(){e&&(e.style.display="none")}var e,f=null,g=function(){if(e=document.getElementById("googleRecaptcha"),null===f){var a=e.dataset.sitekey;f=grecaptcha.render("googleRecaptcha",{sitekey:a})}e.style.display="block"};return{renderRecaptcha:a,resetRecaptcha:b,getRecaptchaResponse:c,hideRecaptcha:d}}();

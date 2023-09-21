@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<!-- saved from url=(0242)https://s3.amazonaws.com/files.etagdigital.com.br/banners/FC9B5739-4FB0-4DD5-8157-084BFEA10C20_280.html?v=7584.782950670326&sessionid=190597bf-79d2-4e29-a099-fa971656afe5&siteid=FC9B5739-4FB0-4DD5-8157-084BFEA10C20&bannerid=280&device=Desktop -->
+<html lang="pt-br"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>
+  <title>E-TAG Tagmanager Ads</title>
+
+  <style type="text/css">
+    body {
+      background: transparent !important;
+    }
+  </style>
+  
+
+  <script src="./jquery-1.6.4.min.js.download"></script>
+  <script type="text/javascript">
+    var url_string = window.location.href;
+    var url = new URL(url_string);
+
+    var produtos = [];
+    var SITE_ID = url.searchParams.get("siteid");
+    var SESSION_ID = url.searchParams.get("sessionid");
+    var BANNER_ID = url.searchParams.get("bannerid");
+    var DEVICE = url.searchParams.get("device");
+
+    function onMessageReceived(e) {
+      if (e.data.cmd == 'updateBannerImage') {
+        let _img = document.querySelector(e.data.value.selector);
+        _img.src = e.data.value.src;
+        _img.style.width = 'auto';
+      }
+
+      if (e.data.cmd == "checkIFrameState") {
+        window.top.postMessage({
+          cmd: 'bannerLoadSuccess'
+        }, '*');
+      }
+
+      if (e.data.cmd == "updateBannerUrl") {
+        if (Number(e.data.value) != 0) {
+          let btnContinue = document.querySelector("a.continuar-comprando");
+          btnContinue.href = btnContinue.href.replace('*', e.data.value);
+        }
+      }
+    }
+
+    if (window.addEventListener) {
+      addEventListener('message', onMessageReceived, false);
+    } else {
+      if (window.attachEvent) {
+        attachEvent('onmessage', onMessageReceived);
+      } else {
+        window.onmessage = onMessageReceived;
+      }
+    }
+  </script>
+</head>
+
+<body ng-app="bannerApp" class="ng-scope" style="">
+
+  <!-- E-TAG MANAGER -->
+  <div id="container">
+
+    <!-- IMPORTAÇÃO DE FONTES -->
+    
+        <!-- IMPORTAÇÃO DE FONTES -->
+
+    <script src="./angular.min.js.download"></script>
+    <script src="./jquery-1.11.0.min.js.download"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <link rel="stylesheet" href="./all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+    <link href="./bootstrap.min.css" rel="stylesheet">
+    <link href="./banner_model_2.min.css" rel="stylesheet">
+
+
+              
+    <style type="text/css">
+      #sidebox-products .top-background {
+        background-image: url(https://via.placeholder.com/340x462);
+        background-size: cover;
+        height: 100% !IMPORTANT;
+              }
+
+      #sidebox-products .bottom .middle-components .f_highlighted {
+        font-family: 'Arial';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      #sidebox-products .bottom .middle-components .f_body {
+        font-family: 'Arial';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      #sidebox-products .bottom .middle-components p.titulo {
+        color: #666666;
+      }
+
+      #sidebox-products .bottom .middle-components p.texto1 {
+        color: #999999;
+      }
+
+      #sidebox-products .bottom .middle-components p.texto2 {
+        color: #999999;
+      }
+
+      #sidebox-products .bottom .middle-components p.texto3 {
+        color: #999999;
+      }
+
+      #sidebox-products .bottom .middle-components p.promocode {
+        color: #FF0000;
+        font-size: 20px;
+        font-weight: 700;
+        position: relative;
+        cursor: pointer;
+      }
+
+      #sidebox-products .bottom .middle-components p.promocode:hover::after {
+        content: 'copiar';
+        background-color: #2d2a29b6;
+        color: white;
+        margin-left: 5px;
+        padding: 5px 7px;
+        font-size: 14px;
+        font-family: arial;
+        position: absolute;
+        left: calc(50% - 26px);
+        bottom: -15px;
+        border-radius: 5px;
+      }
+
+      #sidebox-products .bottom .middle-components .email-enviado p span {
+        color: #666666;
+      }
+
+      #sidebox-products .bottom .middle-components .continuar-comprando {
+        background-color: #000000;
+        color: #ffffff;
+      }
+
+      #sidebox-products .bottom .middle-components .continuar-comprando2 {
+        background-color: ;
+        color: ;
+      }
+
+      #produto-description ul {
+        padding-left: 0;
+      }
+
+      .product-view p,
+      span,
+      h3 {
+        font-family: sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+      }
+
+      @font-face { font-family: NespressoLucas; src: url('../fonts/f37/nespressolucas-regular.ttf'); }
+
+#sidebox-products .bottom .middle-components .button {
+    display: block;
+    font-weight: 400;
+    line-height: 10px;
+    /* margin: 8px 30px 0; */
+    padding: 16px 0;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 18px !important;
+    width: 200px !important;
+    height: 45px !important;
+    border-radius: 0px !important;
+    position: absolute;
+    margin: 0 auto;
+    margin-left: 22%;
+    bottom: 13%;
+    font-family: NespressoLucas !important;
+    background-color:black ;
+    color:white;
+}
+
+.continuar-comprando{
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+}
+#sidebox-products .top,
+#sidebox-products .titulo {
+ background-color: white;
+}
+
+#sidebox-products .scrolling {
+    height: 100%;
+    background-color: #fff !important;
+}
+#sidebox-products .bottom .middle-components .type {
+    padding: 0 0 20px;
+    position: relative;
+}
+#sidebox-products .bottom .middle-components .type .image {
+    display: block;
+    width: 100%;
+    margin: 0 auto 10px;
+    max-width: 100% !important;
+}
+#sidebox-products .header {
+    height: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+}
+
+#sidebox-products .bottom {
+    position: relative;
+    width: calc(100% + 17px);
+    height: calc(100%) !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    background-color: #DED1C0;
+}    </style>
+
+    <div id="sidebox-products">
+      <a class="close-sidebox" href="javascript:;" onclick="closeBannerButton()" style="background-color:; color:;">
+        <i class="fa fa-times"></i>
+      </a>
+
+      <div class="scrolling">
+        <section class="top">
+          <section class="top-components" data-section="top-components">
+            <section class="header">
+                              <img class="header-logo" src="./340x60" alt="">
+                          </section>
+          </section>
+        </section>
+
+        <div class="bottom">
+          <section class="middle-components">
+            <div class="type">
+              <div class="texto-enviado">
+                
+                  
+                                          <img class="image" src="./tagassist-nespresso-awin-fretegratis-sembt 2.png" alt="">
+                    
+                  
+                              </div>
+
+              
+                <a class="button continuar-comprando" href="https://www.awin1.com/cread.php?awinmid=26159&amp;awinaffid=745359&amp;clickref=EtagPanel+Barista+Creations&amp;ued=https%3A%2F%2Fwww.nespresso.com%2Fbr%2Fpt%2Forder%2Fcapsules%2Foriginal%23nesclub2.br.b2c%2Fcat%2Fcapsules-range-barista-creations%3Futm_etag%3DEtagPanel" target="_parent" onclick="closeBanner()">EU QUERO</a>
+
+                          </div>
+          </section>
+
+                  </div>
+
+        <div class="top-background" style="height: 830px;"></div>
+
+              </div>
+    </div>
+
+    <textarea style="display:none;" name="_json_products">[]</textarea>
+    <textarea style="display:none;" name="_json_products_recomendados">[]</textarea>
+
+    <input type="hidden" name="utm_campaigns" value="?utm_source=Etag&amp;utm_medium=EtagPanel" autocomplete="off">
+    <input type="hidden" name="pixel_click_campaigns" value="https://www.awin1.com/cread.php?awinmid=26159&amp;awinaffid=745359&amp;clickref=EtagPanel+Always+On+Produtos&amp;ued=" autocomplete="off">
+    <input type="hidden" name="tags" value="" autocomplete="off">
+
+    <script type="text/javascript">
+      $(window).load(function() {
+        setHeaderHeight();
+      });
+
+      $('#sidebox-products .bottom').scroll(function() {
+        _h = $('#sidebox-products .middle-components').innerHeight();
+
+        if ($(this).scrollTop() > _h) {
+          $('#sidebox-products .filter').addClass('fixed');
+          $('#sidebox-products .products').css('padding', '57px 8px 0 8px');
+        } else {
+          $('#sidebox-products .filter').removeClass('fixed');
+          $('#sidebox-products .products').css('padding', '0 8px');
+        }
+      });
+
+      $('#sidebox-products .filter .open-search').bind('click', function() {
+        //$('#sidebox-products .filter .box-search').show();
+      });
+
+      $('#sidebox-products .filter .box-search .close-search').bind('click', function() {
+        $('#sidebox-products .filter .box-search').hide();
+      });
+
+      $('.promocode').bind('click', function(event) {
+        copyToClipboard(event.target.innerText)
+      })
+
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text)
+      }
+
+      function setHeaderHeight() {
+        _h = $('#sidebox-products .middle-components').innerHeight();
+        _h = _h + 100;
+
+        $('#sidebox-products .top-background').css('height', _h + 'px');
+      }
+
+      $('#campo-valida-email').blur(function() {
+        _mail = $(this).val();
+
+        if (!isEmail(_mail)) {
+          $(this).parent().css('border', '1px solid red');
+        } else {
+          $(this).parent().css('border', '1px solid');
+        }
+      });
+
+      function isEmail(email) {
+        var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        if (regex.test(email)) return true;
+        else return false;
+      }
+    </script>
+
+    <script type="text/javascript">
+      setTimeout(function() {}, 1000);
+
+      $(document).load(function() {
+        setHeaderWidth();
+      });
+
+
+      $('#sidebox-products .filter .open-search').bind('click', function() {
+        $('#sidebox-products .filter .box-search').show();
+      });
+
+      $('#sidebox-products .filter .box-search .close-search').bind('click', function() {
+        $('#sidebox-products .filter .box-search').hide();
+      });
+
+      function closeBanner(utm = '', tipo = '') {
+        utm = (utm != '') ? utm : $('[name=utm_campaigns]').val();
+        window.top.postMessage({
+          cmd: 'closeBanner',
+          value: utm
+        }, '*');
+      }
+
+      function closeBannerButton(utm = '', tipo = '') {
+        window.top.postMessage({
+          cmd: 'bannertracking',
+          value: {
+            status: "closed",
+            trigger: "click_close_button"
+          }
+        }, '*');
+
+        window.top.postMessage({
+          cmd: 'bannertracking',
+          value: {
+            status: "engaged",
+            trigger: "click_close_button"
+          }
+        }, '*');
+
+        closeBanner(utm, tipo)
+      }
+
+      function redirectParent(evt) {
+        if (evt.target.href == 'javascript:;')
+          evt.preventDefault();
+
+        window.top.postMessage({
+          cmd: 'closeBanner',
+          value: ""
+        }, '*');
+
+        window.top.postMessage({
+          cmd: 'bannertracking',
+          value: {
+            origin: evt.target.innerText,
+            status: "engaged",
+            trigger: "click_link"
+          }
+        }, '*');
+
+        // top.location.href = url;
+
+        return evt.target.href != 'javascript:;';
+      }
+
+      function setHeaderWidth() {
+        _w = $('#sidebox-products .header').width();
+
+        $('#sidebox-products .header .logo').css('width', _w + 'px');
+        $('#sidebox-products .action').css('width', _w + 'px');
+      }
+
+      function sendMail(obj) {
+        var email = $('input[name=banner_email]').val();
+        if (email != '') {
+
+          $('.texto-enviado').fadeOut(0);
+          $('.btn-sendmail').remove();
+          $('.email').fadeOut(0);
+          $('.email-enviado').fadeIn(0);
+          $('.email-enviado span').html(email);
+          $(obj).hide();
+
+          window.top.postMessage({
+            cmd: "sendMail",
+            value: email
+          }, "*");
+
+          $.post("https://bossanova.etagdigital.com.br/api/frame/sendmail", {
+            email: email,
+            id: SITE_ID,
+            sessionid: SESSION_ID
+          }, function(data) {});
+        }
+
+      }
+
+      var _json_products = ($('[name=_json_products]').length == 0) ? [] : angular.fromJson($('[name=_json_products]').val());
+      var _json_recommended = ($('[name=_json_products_recomendados]').length == 0) ? [] : angular.fromJson($('[name=_json_products_recomendados]').val());
+      var utm = ($('[name=utm_campaigns]') == '') ? '' : $('[name=utm_campaigns]').val();
+      var pixel_click = ($('[name=pixel_click_campaigns]') == '') ? '' : $('[name=pixel_click_campaigns]').val();
+      var tags = ($('[name=tags]') == '') ? '' : $('[name=tags]').val();
+
+      // Intercept a link
+      const links = document.querySelectorAll('section.middle-components a');
+      for (let link of links) {
+        link.addEventListener("click", redirectParent);
+      }
+    </script>
+
+    <script type="text/javascript">
+      var app = angular.module("bannerApp", []);
+
+      app.controller('produtoCtrl', function($scope, $timeout, $http) {
+        $scope.produtos = [];
+        $scope.objs = [];
+        $scope.recomendacoes = [];
+        $scope.rows = [];
+        $scope.historico = false;
+        $scope.searchtab = false;
+        $scope.product_view = false;
+        $scope.recomendados = true;
+        $scope.tab_active = 'recomendados';
+        $scope.filter = '';
+        $scope.filter2 = '';
+        $scope.json_historico = [];
+        $scope.json_recomendados = [];
+        $scope.isCarregado = false;
+
+        $scope.UniqueArraybyId = function(collection, keyname) {
+          var output = [],
+            keys = [];
+
+          angular.forEach(collection, function(item) {
+            if (item.produto != null && item.produto) {
+              //console.log(item)
+              var key = item.produto[keyname];
+              if ((item.url) && (item.url.indexOf('./') >= 0)) {
+
+              } else if (keys.indexOf(key) === -1) {
+                keys.push(key);
+                output.push(item);
+              }
+            }
+
+          });
+
+          return output;
+        };
+
+        $scope.getRecomendados = function() {
+          $http.get("https://api.etagdigital.com.br/capture/?limit=500&uuid=" + SITE_ID).then(function(data) {
+            $scope.isCarregado = true;
+            var uniqueStandards = $scope.UniqueArraybyId(data.data, "pName_pp");
+            $scope.setRecomendados(uniqueStandards, tags);
+          });
+        }
+        $scope.getHistorico = function() {
+          $http.get("https://api.etagdigital.com.br/capture/" + SESSION_ID + '?uuid=' + SITE_ID).then(function(data) {
+            var uniqueStandards = $scope.UniqueArraybyId(data.data, "pName_pp");
+            $scope.normaliza(uniqueStandards);
+          });
+        }
+
+        $scope.getRecomendados();
+        $scope.getHistorico();
+
+        $scope.change = function(row) {
+          row.selected = (row.selected == 1) ? 0 : 1;
+        }
+
+        $scope.toJson = function() {
+          return angular.toJson($scope.rows);
+        }
+
+        $scope.fromJson = function(s) {
+          return angular.fromJson(s);
+        }
+
+        $scope.showProduct = function(produto) {
+          $scope.historico = false;
+          $scope.recomendados = false;
+          $scope.product_view = true;
+          $scope.searchtab = false;
+          $scope.produto = produto;
+
+          window.top.postMessage({
+            cmd: 'bannertracking',
+            value: {
+              status: "engaged",
+              origin: produto.nome,
+              trigger: "click_show_product"
+            }
+          }, '*');
+        }
+
+        $scope.setBuy = function(produto, aba) {
+          window.top.postMessage({
+            cmd: 'bannertracking',
+            value: {
+              status: "engaged",
+              origin: aba + " | " + produto.nome,
+              trigger: "click_buy"
+            }
+          }, '*');
+
+          top.location.href = produto.url;
+        }
+
+        $scope.setBuyNow = function(produto) {
+          window.top.postMessage({
+            cmd: 'bannertracking',
+            value: {
+              status: "engaged",
+              origin: produto.nome,
+              trigger: "click_buy_now"
+            }
+          }, '*');
+
+          top.location.href = produto.url;
+        }
+
+        $scope.setBack = function() {
+          $scope.product_view = false;
+          $scope.recomendados = false;
+          $scope.historico = false;
+          $scope.searchtab = false;
+
+          if ($scope.tab_active == 'recomendados')
+            $scope.recomendados = true;
+          else if ($scope.tab_active == 'historico')
+            $scope.historico = true;
+          else if ($scope.tab_active == 'search')
+            $scope.searchtab = true;
+          else
+            $scope.product_view = true;
+        }
+
+        $scope.setRecomendacao = function() {
+          $scope.product_view = false;
+          $scope.recomendados = true;
+          $scope.historico = false;
+          $scope.searchtab = false;
+          $scope.tab_active = 'recomendados';
+
+          window.top.postMessage({
+            cmd: 'bannertracking',
+            value: {
+              status: "engaged",
+              trigger: "click_tab_advise"
+            }
+          }, '*');
+        }
+
+        $scope.setProdutos = function() {
+          $scope.product_view = false;
+          $scope.recomendados = false;
+          $scope.historico = true;
+          $scope.searchtab = false;
+          $scope.tab_active = 'historico';
+
+          window.top.postMessage({
+            cmd: 'bannertracking',
+            value: {
+              status: "engaged",
+              trigger: "click_tab_history"
+            }
+          }, '*');
+        }
+
+        $scope.searchTab = function() {
+          $scope.product_view = false;
+          $scope.recomendados = false;
+          $scope.historico = false;
+          $scope.searchtab = true;
+          $scope.tab_active = 'search';
+
+          window.top.postMessage({
+            cmd: 'bannertracking',
+            value: {
+              status: "engaged",
+              trigger: "click_tab_search"
+            }
+          }, '*');
+        }
+
+        $scope.setFilter = function(type = '') {
+          if (type == 'search') {
+            $scope.rows = $scope.setSearch($scope.produtos, $scope.filter2);
+          } else if (type == 'recomendados') {
+            $scope.setRecomendados($scope.recomendacoes, tags, $scope.filter2);
+          } else {
+            $scope.normaliza($scope.objs, $scope.filter);
+          }
+        }
+
+        $scope.normaliza = function(rows, filter = '') {
+          var category_tags = '';
+          var objs = [];
+          for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+
+            if (
+              row.produto.pName_pp == null ||
+              row.produto.pUnitPrice_pp == null || kl(row.produto.hasOwnProperty("validationKey") && !row.produto.validationKey)
+            ) continue;
+
+            var obj = {};
+            if (row) {
+              obj = {
+                nome: (row.produto.pName_pp) ? ((row.produto.pName_pp)) : '--',
+                img: (row.produto.pImage_pp) ? row.produto.pImage_pp : '--',
+                valor: (row.produto.pUnitPrice_pp) ? row.produto.pUnitPrice_pp.replace('R$', '') : '--',
+                description: (row.produto.pDescription_pp) ? ((row.produto.pDescription_pp)) : '--',
+                url: (row.produto.pURL_pp) ?
+                  (pixel_click ? pixel_click : '') + row.produto.pURL_pp.split("?")[0] + (utm.length > 0 ? '?' + utm.replace(/^[\?|&]/g, "") : "") + '&bannerid=' + BANNER_ID : 'javascript:;',
+                category: (row.produto.pCategory_pp) ? ((row.produto.pCategory_pp)) : '--'
+              }
+              obj.img = obj.img.replace('../', row.url);
+              if (row.tipo == 'produtos') {
+                var prod_url = (row.produto.pURL_pp && row.produto.pURL_pp !== null) ? row.produto.pURL_pp : row.url;
+                prod_url = prod_url.split("?")[0]; // remove atributos
+                obj.url = (pixel_click ? pixel_click : '') + prod_url + (utm.length > 0 ? '?' + utm.replace(/^[\?|&]/g, "") : "") + '&bannerid=' + BANNER_ID;
+              }
+            }
+
+            if (obj.nome == '--' || (obj.img == '--' || obj.img == '')) continue;
+
+            if (filter != '') {
+              if (obj.nome.toLowerCase().indexOf($scope.specialChars(filter.toLowerCase())) > -1) {
+                //se filtro
+                objs.push(obj);
+              }
+              continue;
+            }
+            if (objs.length >= 20) break;
+
+            objs.push(obj);
+
+            var tag = $scope.getProductInfo(obj, 'category');
+
+            category_tags += (category_tags.indexOf(tag) == -1) ? tag + '#' : '';
+          }
+
+          if (objs.length > 0) {
+            tags = category_tags;
+          }
+
+          $scope.objs = objs;
+          return objs;
+        }
+
+        $scope.setRecomendados = function(recommended, filters, filter = '') {
+          filters = filters.split('#');
+
+          var recomendados = [];
+          for (var i = 0; i < recommended.length; i++) {
+            var row = recommended[i];
+            if (
+              row.produto.pName_pp == null ||
+              row.produto.pUnitPrice_pp == null ||
+              (row.produto.hasOwnProperty("validationKey") && !row.produto.validationKey)
+            ) continue;
+
+            //FILTRO APENAS PARA SMART CLUBE
+            if (row.uuid == 'A82121F9-0C54-4D2C-905B-F00648EAC6AB') {
+
+              //VERIFICA SE A URL FOI CAPTURADA NO CARRINHO
+              if (row.rowurl.indexOf('IdProduto=') <= -1) {
+                continue;
+              }
+            }
+
+            var obj = {};
+            if (row) {
+              obj = {
+                nome: (row.produto.pName_pp) ? ((row.produto.pName_pp)) : '--',
+                img: (row.produto.pImage_pp) ? row.produto.pImage_pp : '--',
+                valor: (row.produto.pUnitPrice_pp) ? row.produto.pUnitPrice_pp.replace('R$', '') : '--',
+                description: (row.produto.pDescription_pp) ? ((row.produto.pDescription_pp)) : '--',
+                url: (row.produto.pURL_pp) ?
+                  (pixel_click ? pixel_click : '') + row.produto.pURL_pp.split("?")[0] + (utm.length > 0 ? '?' + utm.replace(/^[\?|&]/g, "") : "") + '&bannerid=' + BANNER_ID : 'javascript:;',
+                category: (row.produto.pCategory_pp) ? ((row.produto.pCategory_pp)) : '--'
+              }
+              obj.img = obj.img.replace('../', row.url);
+              if (row.tipo == 'produtos') {
+                var prod_url = (row.produto.pURL_pp && row.produto.pURL_pp !== null) ? row.produto.pURL_pp : row.url;
+                prod_url = prod_url.split("?")[0]; // remove atributos
+                obj.url = (pixel_click ? pixel_click : '') + prod_url + (utm.length > 0 ? '?' + utm.replace(/^[\?|&]/g, "") : "") + '&bannerid=' + BANNER_ID;
+              }
+            }
+
+            if (obj.nome == '--' || (obj.img == '--' || obj.img == '')) continue;
+
+            $scope.produtos.push(obj);
+
+            //aplica filtro das tags de recomendacoes
+            if (filters.length > 0) {
+              for (var j = 0; j < filters.length; j++) {
+                tag = $scope.specialChars(filters[j]);
+                if (tag != '') {
+                  if ($scope.specialChars(obj.nome).toLowerCase().indexOf(tag.toLowerCase()) > -1 || $scope.specialChars(obj.category).toLowerCase().indexOf(tag.toLowerCase()) > -1) {
+                    if (recomendados.length >= 20) break;
+                    //se filtro
+                    recomendados.push(obj);
+                    break;
+                  }
+                }
+              }
+            }
+          }
+
+          //aplica filtro digitado pelo usuario
+          if (filter != '') {
+            var _recomendados = JSON.parse(JSON.stringify(recomendados));
+            recomendados = [];
+            for (var i = 0; i < _recomendados.length; i++) {
+              if ($scope.specialChars(_recomendados[i].nome).toLowerCase().indexOf($scope.specialChars(filter.toLowerCase())) > -1) {
+                //se filtro
+                recomendados.push(_recomendados[i]);
+
+              }
+            }
+          }
+
+          //FORCA RECOMENDACOES CASO NAO ENCONTRE NENHUMA NO FILTRO
+          if (recomendados.length == 0 && $scope.produtos.length > 0) {
+            for (var x = 0; x < $scope.produtos.length; x++) {
+              if (x >= 20) break;
+              recomendados.push($scope.produtos[x]);
+            }
+          }
+
+          $scope.recomendacoes = recomendados;
+          return recomendados;
+        }
+
+        $scope.setSearch = function(recommended, filter = '') {
+          var _produtos = [];
+          var _rows = [];
+          for (var i = 0; i < recommended.length; i++) {
+            var obj = recommended[i];
+
+            //aplica filtro digitado pelo usuario
+            if (filter != '') {
+              if ($scope.specialChars(obj.nome).toLowerCase().indexOf($scope.specialChars(filter.toLowerCase())) > -1) {
+                //se filtro
+                _produtos.push(obj);
+              }
+            }
+          }
+
+          return _produtos;
+        }
+
+        $scope.getProductInfo = function(produto, key) {
+          return produto[key];
+        }
+
+        $scope.trataValor = function(valor) {
+          if (valor == '' || valor == null) return '';
+
+          if (valor.indexOf('R$') <= -1) {
+            valor = 'R$ ' + valor.replace(/&nbsp;/g, '').replace(/\u00a0/g, '');
+          }
+
+          return valor;
+        }
+
+        $scope.exibirDescricaoProduto = function(valor) {
+          document.querySelector('#produto-description').innerHTML = valor;
+        }
+
+        $scope.specialChars = function(str) {
+          var specialChars = [{
+              val: "ae",
+              let: "(ä|æ|ǽ)"
+            },
+            {
+              val: "oe",
+              let: "(ö|œ)"
+            },
+            {
+              val: "ue",
+              let: "(ü)"
+            },
+            {
+              val: "Ae",
+              let: "(Ä)"
+            },
+            {
+              val: "Ue",
+              let: "(Ü)"
+            },
+            {
+              val: "Oe",
+              let: "(Ö)"
+            },
+            {
+              val: "AE",
+              let: "(Æ|Ǽ)"
+            },
+            {
+              val: "ss",
+              let: "(ß)"
+            },
+            {
+              val: "IJ",
+              let: "(Ĳ)"
+            },
+            {
+              val: "ij",
+              let: "(ĳ)"
+            },
+            {
+              val: "OE",
+              let: "(Œ)"
+            },
+            {
+              val: "A",
+              let: "(À|Á|Â|Ã|Ä|Å|Ǻ|Ā|Ă|Ą|Ǎ)"
+            },
+            {
+              val: "a",
+              let: "(à|á|â|ã|å|ǻ|ā|ă|ą|ǎ|ª)"
+            },
+            {
+              val: "C",
+              let: "(Ç|Ć|Ĉ|Ċ|Č)"
+            },
+            {
+              val: "c",
+              let: "(ç|ć|ĉ|ċ|č)"
+            },
+            {
+              val: "D",
+              let: "(Ð|Ď|Đ)"
+            },
+            {
+              val: "d",
+              let: "(ð|ď|đ)"
+            },
+            {
+              val: "E",
+              let: "(È|É|Ê|Ë|Ē|Ĕ|Ė|Ę|Ě)"
+            },
+            {
+              val: "e",
+              let: "(è|é|ê|ë|ē|ĕ|ė|ę|ě)"
+            },
+            {
+              val: "G",
+              let: "(Ĝ|Ğ|Ġ|Ģ)"
+            },
+            {
+              val: "g",
+              let: "(ĝ|ğ|ġ|ģ)"
+            },
+            {
+              val: "H",
+              let: "(Ĥ|Ħ)"
+            },
+            {
+              val: "h",
+              let: "(ĥ|ħ)"
+            },
+            {
+              val: "I",
+              let: "(Ì|Í|Î|Ï|Ĩ|Ī|Ĭ|Ǐ|Į|İ)"
+            },
+            {
+              val: "i",
+              let: "(ì|í|î|ï|ĩ|ī|ĭ|ǐ|į|ı)"
+            },
+            {
+              val: "J",
+              let: "(Ĵ)"
+            },
+            {
+              val: "j",
+              let: "(ĵ)"
+            },
+            {
+              val: "K",
+              let: "(Ķ)"
+            },
+            {
+              val: "k",
+              let: "(ķ)"
+            },
+            {
+              val: "L",
+              let: "(Ĺ|Ļ|Ľ|Ŀ|Ł)"
+            },
+            {
+              val: "l",
+              let: "(ĺ|ļ|ľ|ŀ|ł)"
+            },
+            {
+              val: "N",
+              let: "(Ñ|Ń|Ņ|Ň)"
+            },
+            {
+              val: "n",
+              let: "(ñ|ń|ņ|ň|ŉ)"
+            },
+            {
+              val: "O",
+              let: "(Ò|Ó|Ô|Õ|Ō|Ŏ|Ǒ|Ő|Ơ|Ø|Ǿ)"
+            },
+            {
+              val: "o",
+              let: "(ò|ó|ô|õ|ō|ŏ|ǒ|ő|ơ|ø|ǿ|º)"
+            },
+            {
+              val: "R",
+              let: "(Ŕ|Ŗ|Ř)"
+            },
+            {
+              val: "r",
+              let: "(ŕ|ŗ|ř)"
+            },
+            {
+              val: "S",
+              let: "(Ś|Ŝ|Ş|Š)"
+            },
+            {
+              val: "s",
+              let: "(ś|ŝ|ş|š|ſ)"
+            },
+            {
+              val: "T",
+              let: "(Ţ|Ť|Ŧ)"
+            },
+            {
+              val: "t",
+              let: "(ţ|ť|ŧ)"
+            },
+            {
+              val: "U",
+              let: "(Ù|Ú|Û|Ũ|Ū|Ŭ|Ů|Ű|Ų|Ư|Ǔ|Ǖ|Ǘ|Ǚ|Ǜ)"
+            },
+            {
+              val: "u",
+              let: "(ù|ú|û|ũ|ū|ŭ|ů|ű|ų|ư|ǔ|ǖ|ǘ|ǚ|ǜ)"
+            },
+            {
+              val: "Y",
+              let: "(Ý|Ÿ|Ŷ)"
+            },
+            {
+              val: "y",
+              let: "(ý|ÿ|ŷ)"
+            },
+            {
+              val: "W",
+              let: "(Ŵ)"
+            },
+            {
+              val: "w",
+              let: "(ŵ)"
+            },
+            {
+              val: "Z",
+              let: "(Ź|Ż|Ž)"
+            },
+            {
+              val: "z",
+              let: "(ź|ż|ž)"
+            },
+            {
+              val: "f",
+              let: "(ƒ)"
+            }
+          ];
+
+          for (var i = 0; i < specialChars.length; i++) {
+            str = str.replace(new RegExp(specialChars[i].let, "g"), specialChars[i].val);
+          }
+
+          return str;
+        }
+      })
+    </script>
+
+  </div>
+
+
+
+</body></html>

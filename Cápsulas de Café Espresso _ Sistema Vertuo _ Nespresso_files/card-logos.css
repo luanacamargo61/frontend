@@ -1,0 +1,1 @@
+nb-card-logos{display:flex}nb-card-logos img{height:2rem;width:2rem}nb-card-logos.direction-row{flex-direction:row}nb-card-logos.direction-row img+img{margin-left:.5rem}nb-card-logos.direction-column{flex-direction:column}nb-card-logos.direction-column img+img{margin-top:.5rem}
